@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin - PEM Gondanglegi Malang</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --navy:#0a1f44; --blue:#1a4faf; --gold:#c8922a; --gold-light:#e9b84a;
+    --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0; --gray-500:#64748b;
+    --green:#16a34a; --red:#dc2626; --amber:#d97706;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:var(--gray-50);color:var(--navy);}
+
+  /* ====== CONFIG NOTICE ====== */
+  #config-warning{
+    display:none; background:#fef2f2; border-bottom:2px solid var(--red); color:#991b1b;
+    padding:14px 24px; font-size:13.5px; font-weight:600; text-align:center;
+  }
+  #config-warning code{background:#fee2e2;padding:2px 6px;border-radius:4px;}
+
+  /* ====== LOGIN SCREEN ====== */
+  #login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{
+    background:white; border-radius:18px; padding:40px 36px; width:100%; max-width:380px;
+    box-shadow:0 12px 40px rgba(10,31,68,0.12);
+  }
+  .login-card h1{
+    font-family:'Playfair Display',serif; font-size:22px; color:var(--navy); margin:0 0 4px;
+    text-align:center;
+  }
+  .login-card p.sub{ text-align:center; color:var(--gray-500); font-size:13px; margin:0 0 28px; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+  .field input{
+    width:100%; padding:11px 14px; border:1.5px solid var(--gray-200); border-radius:10px;
+    font-size:14px; font-family:inherit; color:var(--navy);
+  }
+  .field input:focus{ outline:none; border-color:var(--blue); }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 20px; border-radius:10px; border:none; font-family:inherit;
+    font-size:14px; font-weight:700; cursor:pointer; text-decoration:none;
+  }
+  .btn-primary{ background:var(--navy); color:white; width:100%; }
+  .btn-primary:hover{ background:var(--blue); }
+  .btn-outline{ background:white; border:1.5px solid var(--gray-200); color:var(--navy); }
+  .btn-danger{ background:#fef2f2; color:var(--red); border:1.5px solid #fecaca; }
+  .btn-sm{ padding:7px 12px; font-size:12.5px; }
+  #login-error{
+    display:none; background:#fef2f2; color:#991b1b; border:1px solid #fecaca;
+    padding:10px 14px; border-radius:8px; font-size:12.5px; font-weight:600; margin-bottom:14px;
+  }
+
+  /* ====== DASHBOARD ====== */
+  #dashboard{ display:none; }
+  header.admin-header{
+    background:var(--navy); color:white; padding:16px 28px; display:flex;
+    align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  header.admin-header .brand{ display:flex; align-items:center; gap:10px; }
+  header.admin-header .brand strong{ font-family:'Playfair Display',serif; font-size:16px; }
+  header.admin-header .brand span{ font-size:11.5px; color:var(--gold-light); display:block; }
+  .admin-main{ padding:28px; max-width:1300px; margin:0 auto; }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .stat-box{ background:white; border-radius:14px; padding:18px 20px; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+  .stat-box .num{ font-size:26px; font-weight:800; color:var(--navy); }
+  .stat-box .lbl{ font-size:12px; color:var(--gray-500); margin-top:2px; }
+
+  .toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  .toolbar input[type=text]{
+    padding:9px 14px; border:1.5px solid var(--gray-200); border-radius:8px; font-size:13.5px;
+    font-family:inherit; min-width:220px;
+  }
+
+  .table-wrap{ background:white; border-radius:14px; overflow:auto; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+  table{ width:100%; border-collapse:collapse; font-size:13px; min-width:900px; }
+  th{ text-align:left; padding:12px 14px; background:var(--gray-50); color:var(--navy); font-weight:700; white-space:nowrap; border-bottom:2px solid var(--gray-200); }
+  td{ padding:12px 14px; border-bottom:1px solid var(--gray-100); vertical-align:top; }
+  tr:hover td{ background:#fafbfc; }
+  .badge{ display:inline-block; padding:4px 10px; border-radius:100px; font-size:11.5px; font-weight:700; }
+  .badge-pending{ background:#fef3c7; color:#92400e; }
+  .badge-diterima{ background:#dcfce7; color:#166534; }
+  .badge-ditolak{ background:#fee2e2; color:#991b1b; }
+  select.status-select{
+    padding:6px 8px; border-radius:6px; border:1.5px solid var(--gray-200); font-family:inherit; font-size:12.5px;
+  }
+  .icon-btn{
+    background:none; border:none; cursor:pointer; color:var(--gray-500); font-size:14px; padding:6px;
+  }
+  .icon-btn:hover{ color:var(--red); }
+  #empty-state{ text-align:center; padding:60px 20px; color:var(--gray-500); }
+  #loading-state{ text-align:center; padding:60px 20px; color:var(--gray-500); }
+
+  @media(max-width:768px){
+    .stat-row{ grid-template-columns:1fr 1fr; }
+    .admin-main{ padding:16px; }
+  }
+
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto;z-index:50;}
+  .modal-box{background:#fff;border-radius:14px;max-width:760px;width:100%;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25);}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;}
+  .modal-head h3{margin:0;font-size:18px;color:#0a1f44;}
+  .modal-sec{margin:18px 0 6px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#64748b;}
+  .modal-box table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .modal-box td{padding:7px 10px;border:1px solid #e2e8f0;vertical-align:top;}
+  .modal-box td:first-child{width:36%;font-weight:600;color:#0a1f44;background:#f8fafc;}
+  .bukti-img{max-width:100%;border:1px solid #e2e8f0;border-radius:10px;margin-top:10px;}
+  .nv-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 22px;margin-bottom:16px;}
+  .nv-card h3{margin:0 0 6px;font-size:16px;color:#0a1f44;}
+  .nv-card p{font-size:13.5px;color:#64748b;line-height:1.6;margin:0 0 10px;}
+  .nv-card code{background:#f1f5f9;padding:1px 6px;border-radius:4px;font-size:12.5px;}
+  .nv-row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+  .nv-row label{font-size:13px;font-weight:600;color:#0a1f44;}
+  .nv-row input[type=text]{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;min-width:220px;}
+  .nv-err{color:#b91c1c;font-size:13.5px;font-weight:600;}
+  .nv-masalah{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;margin:8px 0;}
+  .nv-masalah ul{margin:6px 0 0 18px;padding:0;}
+  .kt-chip{border:1px solid #cbd5e1;background:#fff;color:#0a1f44;font-weight:600;font-size:13px;padding:7px 16px;border-radius:20px;cursor:pointer;}
+  .kt-chip.aktif,.kt-chip:hover{background:#0a1f44;color:#fff;border-color:#0a1f44;}
+  .kt-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;margin-bottom:10px;}
+  .kt-badge{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0;}
+  .kt-badge.terbit{background:#dcfce7;color:#15803d;} .kt-badge.draf{background:#fef3c7;color:#b45309;}
+  .kt-f{margin:12px 0;}
+  .kt-f label{display:block;font-size:13px;font-weight:600;color:#0a1f44;margin-bottom:5px;}
+  .kt-f input[type=text],.kt-f input[type=url],.kt-f input[type=date],.kt-f select,.kt-f textarea{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;}
+  .kt-f textarea{resize:vertical;}
+</style>
+</head>
+<body>
+
+<div id="config-warning">
+  <i class="fas fa-triangle-exclamation"></i>
+  Panel ini belum terhubung ke database. Isi <code>SUPABASE_URL</code> dan <code>SUPABASE_ANON_KEY</code> di bagian atas file ini (lihat komentar <code>KONFIGURASI</code> pada kode).
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Panel Admin</h1>
+    <p class="sub">PEM Gondanglegi Malang &middot; Login khusus panitia</p>
+    <div id="login-error"><i class="fas fa-circle-exclamation"></i> <span id="login-error-text">Email atau password salah.</span></div>
+    <form id="login-form" onsubmit="return false;">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="admin@pemgondanglegi.sch.id" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" required>
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()" type="submit">
+        <i class="fas fa-right-to-bracket"></i> Masuk
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header class="admin-header">
+    <div class="brand">
+      <div>
+        <strong>Panel Admin PSB</strong>
+        <span>PEM Gondanglegi Malang</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span id="admin-email-display" style="font-size:12.5px;color:var(--gold-light);"></span>
+      <button class="btn btn-outline btn-sm" onclick="doLogout()"><i class="fas fa-right-from-bracket"></i> Keluar</button>
+    </div>
+  </header>
+
+  <div class="admin-main">
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button class="btn btn-sm btn-primary" id="tab-pendaftar" onclick="gantiTab('pendaftar')"><i class="fas fa-users"></i> Pendaftar</button>
+      <button class="btn btn-sm btn-outline" id="tab-saran" onclick="gantiTab('saran')"><i class="fas fa-comment-dots"></i> Kotak Saran <span id="saran-badge"></span></button>
+      <button class="btn btn-sm btn-outline" id="tab-nilai" onclick="gantiTab('nilai')"><i class="fas fa-file-import"></i> Nilai &amp; LBS</button>
+      <button class="btn btn-sm btn-outline" id="tab-konten" onclick="gantiTab('konten')"><i class="fas fa-newspaper"></i> Konten</button>
+    </div>
+    <div id="panel-pendaftar">
+    <div class="stat-row">
+      <div class="stat-box"><div class="num" id="stat-total">0</div><div class="lbl">Total Pendaftar</div></div>
+      <div class="stat-box"><div class="num" id="stat-pending">0</div><div class="lbl">Menunggu Verifikasi</div></div>
+      <div class="stat-box"><div class="num" id="stat-diterima">0</div><div class="lbl">Diterima</div></div>
+      <div class="stat-box"><div class="num" id="stat-ditolak">0</div><div class="lbl">Ditolak</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search-box" placeholder="Cari nama / no. pendaftaran / NIK / NISN / asal sekolah..." oninput="renderTable()">
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-outline btn-sm" onclick="loadData()"><i class="fas fa-rotate"></i> Muat Ulang</button>
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Ekspor CSV</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div id="loading-state"><i class="fas fa-spinner fa-spin"></i> Memuat data...</div>
+      <div id="empty-state" style="display:none;"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:10px;display:block;"></i>Belum ada pendaftar.</div>
+      <table id="data-table" style="display:none;">
+        <thead>
+          <tr>
+            <th>No. Pendaftaran</th>
+            <th>Nama</th>
+            <th>NIK</th>
+            <th>Tgl Lahir</th>
+            <th>Asal Sekolah</th>
+            <th>Pilihan</th>
+            <th>Skor Tes</th>
+            <th>No. HP Ortu</th>
+            <th>Tgl Daftar</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="data-tbody"></tbody>
+      </table>
+    </div>
+
+    </div>
+    <div id="panel-saran" style="display:none;">
+      <div class="toolbar">
+        <div id="saran-ringkas" style="font-size:14px;color:#64748b;"></div>
+        <div><button class="btn btn-outline btn-sm" onclick="muatSaran()"><i class="fas fa-rotate"></i> Muat Ulang</button></div>
+      </div>
+      <div id="saran-list"></div>
+    </div>
+
+    <div id="panel-nilai" style="display:none;">
+      <div class="nv-card">
+        <h3>1. Daftar Santri (NIS)</h3>
+        <p>Unduh daftar ini lalu pakai kolom <code>nis</code>-nya pada berkas CSV nilai dan laporan bulanan.</p>
+        <button class="btn btn-outline btn-sm" onclick="unduhDaftarSantri()"><i class="fas fa-download"></i> Unduh Daftar Santri (CSV)</button>
+      </div>
+
+      <div class="nv-card">
+        <h3>2. Impor Nilai E-Raport</h3>
+        <p>Kolom CSV: <code>nis</code>, <code>mapel</code>, <code>nilai</code> (0-100), <code>predikat</code> (opsional). Satu baris untuk satu mata pelajaran. Mengimpor ulang semester dan mata pelajaran yang sama akan menimpa nilai lama.</p>
+        <div class="nv-row"><label for="nv-semester">Semester</label><input type="text" id="nv-semester" maxlength="40" placeholder="2026/2027 Ganjil"></div>
+        <div class="nv-row"><input type="file" id="nv-file-raport" accept=".csv,text/csv"></div>
+        <div class="nv-row">
+          <button class="btn btn-outline btn-sm" onclick="unduhTemplate('raport')"><i class="fas fa-download"></i> Unduh Template</button>
+          <button class="btn btn-sm btn-primary" onclick="pratinjauImpor('raport')"><i class="fas fa-magnifying-glass"></i> Periksa Berkas</button>
+        </div>
+        <div id="nv-hasil-raport"></div>
+      </div>
+
+      <div class="nv-card">
+        <h3>3. Impor Laporan Bulanan (LBS)</h3>
+        <p>Kolom CSV: <code>nis</code>, <code>bulan</code> (format TTTT-BB, contoh 2026-10), <code>kehadiran_persen</code> (0-100), <code>juz_hafalan</code> (0-30), <code>nilai_akhlak</code>, <code>catatan</code>. Mengimpor ulang bulan yang sama akan menimpa laporan lama.</p>
+        <div class="nv-row"><input type="file" id="nv-file-lbs" accept=".csv,text/csv"></div>
+        <div class="nv-row">
+          <button class="btn btn-outline btn-sm" onclick="unduhTemplate('lbs')"><i class="fas fa-download"></i> Unduh Template</button>
+          <button class="btn btn-sm btn-primary" onclick="pratinjauImpor('lbs')"><i class="fas fa-magnifying-glass"></i> Periksa Berkas</button>
+        </div>
+        <div id="nv-hasil-lbs"></div>
+      </div>
+    </div>
+
+    <div id="panel-konten" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="kt-chip aktif" data-j="berita" onclick="ktPilihJenis('berita')">Berita</button>
+        <button class="kt-chip" data-j="pengumuman" onclick="ktPilihJenis('pengumuman')">Pengumuman</button>
+        <button class="kt-chip" data-j="prestasi" onclick="ktPilihJenis('prestasi')">Prestasi</button>
+        <button class="kt-chip" data-j="galeri" onclick="ktPilihJenis('galeri')">Galeri</button>
+        <button class="kt-chip" data-j="karya" onclick="ktPilihJenis('karya')">Karya Santri</button>
+        <button class="kt-chip" data-j="alumni" onclick="ktPilihJenis('alumni')">Alumni</button>
+      </div>
+      <div class="toolbar">
+        <div id="kt-ringkas" style="font-size:14px;color:#64748b;"></div>
+        <div><button class="btn btn-primary btn-sm" onclick="ktBaru()"><i class="fas fa-plus"></i> Tambah</button></div>
+      </div>
+      <div id="kt-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="kt-modal">
+  <div class="modal-box" id="kt-form"></div>
+</div>
+
+<div class="modal-bg" id="detail-modal" onclick="if(event.target===this)closeDetail()">
+  <div class="modal-box" id="modal-content"></div>
+</div>
+
+<script>
+/* =========================================================
+   KONFIGURASI — isi dua baris di bawah ini dengan data dari
+   project Supabase Anda (Project Settings > API):
+   ========================================================= */
+const SUPABASE_URL = 'https://paozawnrvgecfwmevkwe.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_6Ar5Y_60iDLdgeFi52Oliw_mOack5C1';
+/* ========================================================= */
+
+let supabaseClient = null;
+let allRows = [];
+let tesMap = {};
+
+function isConfigured() {
+  return !!SUPABASE_URL && !!SUPABASE_ANON_KEY;
+}
+
+if (isConfigured()) {
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  document.getElementById('config-warning').style.display = 'block';
+}
+
+async function pastikanAdmin() {
+  const { data, error } = await supabaseClient.rpc('is_admin');
+  if (error || data !== true) {
+    await supabaseClient.auth.signOut();
+    return false;
+  }
+  return true;
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errBox = document.getElementById('login-error');
+  const errText = document.getElementById('login-error-text');
+
+  if (!isConfigured()) {
+    errText.textContent = 'Database belum dikonfigurasi. Hubungi pengelola website.';
+    errBox.style.display = 'block';
+    return;
+  }
+  if (!email || !password) return;
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) {
+    errText.textContent = 'Email atau password salah.';
+    errBox.style.display = 'block';
+    return;
+  }
+  if (!(await pastikanAdmin())) {
+    errText.textContent = 'Akun ini tidak punya akses admin.';
+    errBox.style.display = 'block';
+    return;
+  }
+  errBox.style.display = 'none';
+  document.getElementById('admin-email-display').textContent = data.user.email;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadData();
+}
+
+async function doLogout() {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-password').value = '';
+}
+
+async function checkExistingSession() {
+  if (!isConfigured()) return;
+  const { data } = await supabaseClient.auth.getSession();
+  if (data.session && await pastikanAdmin()) {
+    document.getElementById('admin-email-display').textContent = data.session.user.email;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadData();
+  }
+}
+checkExistingSession();
+
+async function loadData() {
+  if (!supabaseClient) return;
+  document.getElementById('loading-state').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('data-table').style.display = 'none';
+
+  const { data, error } = await supabaseClient
+    .from('psb_pendaftar')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  document.getElementById('loading-state').style.display = 'none';
+
+  if (error) {
+    alert('Gagal memuat data: ' + error.message);
+    return;
+  }
+  allRows = data || [];
+  await muatHasilTes();
+  muatSaran();
+  updateStats();
+  renderTable();
+}
+
+async function muatHasilTes() {
+  tesMap = {};
+  const { data, error } = await supabaseClient
+    .from('tes_sesi')
+    .select('pendaftar_id,skor,benar,total,mulai_at,selesai_at,otomatis');
+  if (error) { console.warn('Hasil tes belum dapat dimuat:', error.message); return; }
+  (data || []).forEach(t => { tesMap[t.pendaftar_id] = t; });
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = allRows.length;
+  document.getElementById('stat-pending').textContent = allRows.filter(r => (r.status || 'Menunggu Verifikasi') === 'Menunggu Verifikasi').length;
+  document.getElementById('stat-diterima').textContent = allRows.filter(r => r.status === 'Diterima').length;
+  document.getElementById('stat-ditolak').textContent = allRows.filter(r => r.status === 'Ditolak').length;
+}
+
+function renderTable() {
+  const q = document.getElementById('search-box').value.trim().toLowerCase();
+  const rows = allRows.filter(r =>
+    !q ||
+    (r.nama || '').toLowerCase().includes(q) ||
+    (r.no_pendaftaran || '').toLowerCase().includes(q) ||
+    (r.asal_sekolah || '').toLowerCase().includes(q) ||
+    (r.nik || '').includes(q) ||
+    (r.nisn || '').includes(q)
+  );
+
+  const tbody = document.getElementById('data-tbody');
+  if (rows.length === 0) {
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('data-table').style.display = 'none';
+    return;
+  }
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('data-table').style.display = 'table';
+
+  tbody.innerHTML = rows.map(r => {
+    const status = r.status || 'Menunggu Verifikasi';
+    const badgeClass = status === 'Diterima' ? 'badge-diterima' : status === 'Ditolak' ? 'badge-ditolak' : 'badge-pending';
+    const tglDaftar = r.created_at ? new Date(r.created_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+    const tglLahir = r.tanggal_lahir ? new Date(r.tanggal_lahir).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+    const t = tesMap[r.id];
+    const tesTxt = !t ? '<span style="color:#94a3b8;">Belum</span>'
+      : (t.selesai_at ? `<strong>${esc(t.skor)}</strong> <small>(${esc(t.benar)}/${esc(t.total)})</small>`
+                      : '<span style="color:#b45309;">Mengerjakan</span>');
+    return `<tr>
+      <td><strong>${esc(r.no_pendaftaran || '-')}</strong></td>
+      <td>${esc(r.nama || '-')}</td>
+      <td>${esc(r.nik || '-')}</td>
+      <td>${tglLahir}</td>
+      <td>${esc(r.asal_sekolah || '-')}</td>
+      <td>${esc(r.pilihan_sekolah || '-')}</td>
+      <td>${tesTxt}</td>
+      <td>${esc(r.no_hp_ortu || '-')}</td>
+      <td>${tglDaftar}</td>
+      <td>
+        <select class="status-select" onchange="updateStatus('${r.id}', this.value)">
+          <option value="Menunggu Verifikasi" ${status==='Menunggu Verifikasi'?'selected':''}>Menunggu Verifikasi</option>
+          <option value="Diterima" ${status==='Diterima'?'selected':''}>Diterima</option>
+          <option value="Ditolak" ${status==='Ditolak'?'selected':''}>Ditolak</option>
+        </select>
+      </td>
+      <td style="white-space:nowrap;">
+        <button class="icon-btn" title="Lihat detail &amp; bukti bayar" onclick="showDetail('${r.id}')"><i class="fas fa-eye"></i></button>
+        <button class="icon-btn" title="Hapus" onclick="deleteRow('${r.id}')"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function updateStatus(id, newStatus) {
+  const { error } = await supabaseClient.from('psb_pendaftar').update({ status: newStatus }).eq('id', id);
+  if (error) { alert('Gagal mengubah status: ' + error.message); return; }
+  const row = allRows.find(r => r.id === id);
+  if (row) row.status = newStatus;
+  updateStats();
+}
+
+async function deleteRow(id) {
+  if (!confirm('Hapus data pendaftar ini? Tindakan ini tidak dapat dibatalkan.')) return;
+  const baris = allRows.find(r => r.id === id);
+  const { error } = await supabaseClient.from('psb_pendaftar').delete().eq('id', id);
+  if (error) { alert('Gagal menghapus: ' + error.message); return; }
+  if (baris && baris.bukti_bayar_path) {
+    await supabaseClient.storage.from('bukti-indent').remove([baris.bukti_bayar_path]);
+  }
+  allRows = allRows.filter(r => r.id !== id);
+  updateStats();
+  renderTable();
+}
+
+const KOLOM_EXPORT = [
+  ['no_pendaftaran','No. Pendaftaran'],['nama','Nama Lengkap'],['nik','NIK'],['nisn','NISN'],
+  ['tempat_lahir','Tempat Lahir'],['tanggal_lahir','Tanggal Lahir'],['jenis_kelamin','Jenis Kelamin'],['agama','Agama'],
+  ['anak_ke','Anak Ke'],['status_anak','Status Anak'],['asal_sekolah','Asal Sekolah'],['alamat_sekolah','Alamat Sekolah'],
+  ['alamat','Alamat Santri'],['no_hp','No. Telepon Santri'],['email','Email'],['riwayat_penyakit','Riwayat Penyakit'],
+  ['pilihan_sekolah','Pilihan Sekolah'],
+  ['nama_ayah','Nama Ayah'],['nama_ibu','Nama Ibu'],['alamat_ayah','Alamat Ayah'],['alamat_ibu','Alamat Ibu'],
+  ['no_hp_ortu','No. Telepon Ayah/Ibu'],['pekerjaan_ayah','Pekerjaan Ayah'],['pekerjaan_ibu','Pekerjaan Ibu'],
+  ['pendidikan_ayah','Pendidikan Ayah'],['pendidikan_ibu','Pendidikan Ibu'],
+  ['penghasilan_ayah','Penghasilan Ayah'],['penghasilan_ibu','Penghasilan Ibu'],
+  ['tanggal_bayar','Tanggal Pembayaran Indent'],['skor_tes','Skor Tes'],['benar_tes','Jawaban Benar'],['selesai_tes','Tes Selesai'],['status','Status'],['created_at','Tanggal Daftar']
+];
+
+// Mencegah rumus Excel/Sheets dari isi formulir (CSV injection)
+function csvAman(v) {
+  let s = String(v == null ? '' : v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function exportCSV() {
+  if (allRows.length === 0) { alert('Tidak ada data untuk diekspor.'); return; }
+  const csvRows = [KOLOM_EXPORT.map(k => csvAman(k[1])).join(',')];
+  allRows.forEach(r => {
+    const t = tesMap[r.id];
+    const rr = Object.assign({}, r, {
+      skor_tes: t && t.selesai_at ? t.skor : '',
+      benar_tes: t && t.selesai_at ? t.benar + '/' + t.total : '',
+      selesai_tes: t && t.selesai_at ? t.selesai_at : ''
+    });
+    csvRows.push(KOLOM_EXPORT.map(k => csvAman(k[0] === 'status' ? (r.status || 'Menunggu Verifikasi') : rr[k[0]])).join(','));
+  });
+  const blob = new Blob(['\ufeff' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pendaftar-psb-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+const DETAIL_GROUPS = [
+  ['Data Calon Santri', [
+    ['nama','Nama Lengkap'],['nik','NIK'],['nisn','NISN'],['tempat_lahir','Tempat Lahir'],['tanggal_lahir','Tanggal Lahir'],
+    ['jenis_kelamin','Jenis Kelamin'],['agama','Agama'],['anak_ke','Anak Ke'],['status_anak','Status Anak dalam Keluarga'],
+    ['asal_sekolah','Asal Sekolah'],['alamat_sekolah','Alamat Sekolah'],['alamat','Alamat Lengkap Santri'],
+    ['no_hp','No. Telepon Santri'],['email','Email'],['riwayat_penyakit','Riwayat Penyakit'],['pilihan_sekolah','Pilihan Sekolah']]],
+  ['Data Orang Tua / Wali', [
+    ['nama_ayah','Nama Ayah'],['nama_ibu','Nama Ibu'],['alamat_ayah','Alamat Ayah'],['alamat_ibu','Alamat Ibu'],
+    ['no_hp_ortu','No. Telepon Ayah/Ibu'],['pekerjaan_ayah','Pekerjaan Ayah'],['pekerjaan_ibu','Pekerjaan Ibu'],
+    ['pendidikan_ayah','Pendidikan Ayah'],['pendidikan_ibu','Pendidikan Ibu'],
+    ['penghasilan_ayah','Penghasilan Ayah'],['penghasilan_ibu','Penghasilan Ibu']]],
+  ['Pembayaran Indent', [['tanggal_bayar','Tanggal Pembayaran']]],
+  ['Persetujuan', [['persetujuan_at','Menyetujui Kebijakan Privasi pada']]]
+];
+
+let sarans = [];
+
+function gantiTab(t) {
+  ['pendaftar', 'saran', 'nilai', 'konten'].forEach(x => {
+    document.getElementById('panel-' + x).style.display = x === t ? '' : 'none';
+    document.getElementById('tab-' + x).className = 'btn btn-sm ' + (x === t ? 'btn-primary' : 'btn-outline');
+  });
+  if (t === 'konten') ktPilihJenis(ktJenis);
+}
+
+async function muatSaran() {
+  const box = document.getElementById('saran-list');
+  const { data, error } = await supabaseClient.from('saran').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) {
+    box.innerHTML = '<p style="color:#dc2626;font-size:13.5px;">Kotak Saran belum dapat dimuat: ' + esc(error.message) + '</p>';
+    return;
+  }
+  sarans = data || [];
+  renderSaran();
+}
+
+function renderSaran() {
+  const box = document.getElementById('saran-list');
+  const belum = sarans.filter(s => !s.dibaca).length;
+  document.getElementById('saran-badge').textContent = belum ? '(' + belum + ')' : '';
+  document.getElementById('saran-ringkas').textContent = sarans.length + ' pesan, ' + belum + ' belum dibaca';
+  if (!sarans.length) {
+    box.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;"><i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:10px;"></i>Belum ada pesan.</div>';
+    return;
+  }
+  box.innerHTML = sarans.map(s => `
+    <div style="background:#fff;border:1px solid ${s.dibaca ? '#e2e8f0' : '#fcd34d'};${s.dibaca ? '' : 'background:#fffbeb;'}border-radius:12px;padding:14px 18px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <div><strong>${esc(s.nama)}</strong>
+          ${s.email ? ` &middot; <a href="mailto:${esc(s.email)}" style="color:#0a1f44;">${esc(s.email)}</a>` : ''}</div>
+        <div style="font-size:12.5px;color:#64748b;">${esc(fmtWaktu(s.created_at))}</div>
+      </div>
+      ${s.subjek ? `<div style="font-weight:600;margin-bottom:4px;">${esc(s.subjek)}</div>` : ''}
+      <div style="white-space:pre-wrap;font-size:14px;line-height:1.6;color:#334155;">${esc(s.pesan)}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-outline btn-sm" onclick="tandaiSaran(${Number(s.id)}, ${s.dibaca ? 'false' : 'true'})">${s.dibaca ? 'Tandai belum dibaca' : 'Tandai sudah dibaca'}</button>
+        <button class="icon-btn" title="Hapus" onclick="hapusSaran(${Number(s.id)})"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+async function tandaiSaran(id, dibaca) {
+  const { error } = await supabaseClient.from('saran').update({ dibaca }).eq('id', id);
+  if (error) { alert('Gagal memperbarui: ' + error.message); return; }
+  const s = sarans.find(x => x.id === id); if (s) s.dibaca = dibaca;
+  renderSaran();
+}
+
+async function hapusSaran(id) {
+  if (!confirm('Hapus pesan ini secara permanen?')) return;
+  const { error } = await supabaseClient.from('saran').delete().eq('id', id);
+  if (error) { alert('Gagal menghapus: ' + error.message); return; }
+  sarans = sarans.filter(x => x.id !== id);
+  renderSaran();
+}
+
+/* =========================================================
+   IMPOR NILAI E-RAPORT & LAPORAN BULANAN (LBS) DARI CSV
+   ========================================================= */
+let _nvSantri = null;
+const _nvBaris = { raport: null, lbs: null };
+
+function nvNorm(s) { return String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+async function nvMuatSantri(paksa) {
+  if (_nvSantri && !paksa) return _nvSantri;
+  const { data, error } = await supabaseClient.from('santri').select('id,nis,nama,kelas').order('nama').limit(5000);
+  if (error) throw new Error(error.message);
+  _nvSantri = data || [];
+  return _nvSantri;
+}
+
+function parseCSV(teks) {
+  teks = String(teks || '').replace(/^\uFEFF/, '');
+  const barisPertama = teks.split(/\r?\n/)[0] || '';
+  const hit = c => (barisPertama.match(new RegExp(c === '\t' ? '\t' : '\\' + c, 'g')) || []).length;
+  const pemisah = hit(';') > hit(',') ? ';' : (hit('\t') > hit(',') ? '\t' : ',');
+  const rows = []; let row = [], cur = '', kutip = false;
+  const tutupBaris = () => { row.push(cur); cur = ''; if (row.some(x => x.trim() !== '')) rows.push(row); row = []; };
+  for (let i = 0; i < teks.length; i++) {
+    const c = teks[i];
+    if (kutip) {
+      if (c === '"') { if (teks[i + 1] === '"') { cur += '"'; i++; } else kutip = false; }
+      else cur += c;
+    } else if (c === '"') kutip = true;
+    else if (c === pemisah) { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && teks[i + 1] === '\n') i++; tutupBaris(); }
+    else cur += c;
+  }
+  if (cur !== '' || row.length) tutupBaris();
+  return rows;
+}
+
+function nvAngka(s) {
+  const t = String(s == null ? '' : s).trim().replace(',', '.');
+  if (t === '') return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function nvKolom(header, wajib) {
+  const peta = {};
+  header.forEach((h, i) => { peta[nvNorm(h)] = i; });
+  const hilang = wajib.filter(k => !(k in peta));
+  return { peta, hilang };
+}
+
+async function nvValidasi(jenis, teks) {
+  const santri = await nvMuatSantri();
+  const byNis = {}; santri.forEach(s => { byNis[nvNorm(s.nis)] = s; });
+  const rows = parseCSV(teks);
+  if (rows.length < 2) return { error: 'Berkas kosong atau tidak memiliki baris data.' };
+
+  const wajib = jenis === 'raport' ? ['nis', 'mapel', 'nilai'] : ['nis', 'bulan'];
+  const { peta, hilang } = nvKolom(rows[0], wajib);
+  if (hilang.length) return { error: 'Kolom wajib tidak ditemukan pada baris pertama: ' + hilang.join(', ') + '.' };
+
+  const ambil = (r, k) => (k in peta ? String(r[peta[k]] == null ? '' : r[peta[k]]).trim() : '');
+  const valid = new Map(); const masalah = []; let duplikat = 0;
+
+  rows.slice(1).forEach((r, idx) => {
+    const no = idx + 2; // nomor baris di berkas (baris 1 = judul kolom)
+    const s = byNis[nvNorm(ambil(r, 'nis'))];
+    if (!s) { masalah.push({ no, pesan: 'NIS "' + ambil(r, 'nis') + '" tidak ditemukan' }); return; }
+
+    if (jenis === 'raport') {
+      const mapel = ambil(r, 'mapel'); const nilai = nvAngka(ambil(r, 'nilai')); const predikat = ambil(r, 'predikat');
+      if (!mapel || mapel.length > 100) { masalah.push({ no, pesan: 'Mata pelajaran kosong atau lebih dari 100 karakter' }); return; }
+      if (nilai === null || Number.isNaN(nilai) || nilai < 0 || nilai > 100) { masalah.push({ no, pesan: 'Nilai harus angka 0-100' }); return; }
+      if (predikat.length > 20) { masalah.push({ no, pesan: 'Predikat lebih dari 20 karakter' }); return; }
+      const kunci = s.id + '|' + mapel.toLowerCase();
+      if (valid.has(kunci)) duplikat++;
+      valid.set(kunci, { santri_id: s.id, mapel, nilai, predikat: predikat || null, _nama: s.nama });
+    } else {
+      const bulan = ambil(r, 'bulan');
+      const mb = bulan.match(/^(\d{4})-(0[1-9]|1[0-2])$/);
+      if (!mb) { masalah.push({ no, pesan: 'Bulan harus berformat TTTT-BB, contoh 2026-10' }); return; }
+      const hadir = nvAngka(ambil(r, 'kehadiranpersen')); const juz = nvAngka(ambil(r, 'juzhafalan'));
+      const akhlak = ambil(r, 'nilaiakhlak'); const catatan = ambil(r, 'catatan');
+      if (Number.isNaN(hadir) || (hadir !== null && (hadir < 0 || hadir > 100))) { masalah.push({ no, pesan: 'Kehadiran harus angka 0-100' }); return; }
+      if (Number.isNaN(juz) || (juz !== null && (juz < 0 || juz > 30))) { masalah.push({ no, pesan: 'Juz hafalan harus angka 0-30' }); return; }
+      if (akhlak.length > 50) { masalah.push({ no, pesan: 'Nilai akhlak lebih dari 50 karakter' }); return; }
+      if (catatan.length > 500) { masalah.push({ no, pesan: 'Catatan lebih dari 500 karakter' }); return; }
+      if (hadir === null && juz === null && !akhlak && !catatan) { masalah.push({ no, pesan: 'Tidak ada isian laporan pada baris ini' }); return; }
+      const kunci = s.id + '|' + bulan;
+      if (valid.has(kunci)) duplikat++;
+      valid.set(kunci, { santri_id: s.id, bulan: bulan + '-01', kehadiran_persen: hadir, juz_hafalan: juz, nilai_akhlak: akhlak || null, catatan: catatan || null, _nama: s.nama });
+    }
+  });
+  return { baris: Array.from(valid.values()), masalah, duplikat, total: rows.length - 1 };
+}
+
+async function pratinjauImpor(jenis) {
+  const hasil = document.getElementById('nv-hasil-' + jenis);
+  const file = document.getElementById('nv-file-' + jenis).files[0];
+  _nvBaris[jenis] = null;
+  if (jenis === 'raport') {
+    const sem = (document.getElementById('nv-semester').value || '').trim();
+    if (!sem || sem.length > 40) { hasil.innerHTML = '<p class="nv-err">Isi kolom Semester dulu (maksimal 40 karakter), contoh: 2026/2027 Ganjil.</p>'; return; }
+  }
+  if (!file) { hasil.innerHTML = '<p class="nv-err">Pilih berkas CSV terlebih dahulu.</p>'; return; }
+  if (file.size > 3 * 1024 * 1024) { hasil.innerHTML = '<p class="nv-err">Ukuran berkas maksimal 3 MB.</p>'; return; }
+  hasil.innerHTML = '<p>Memeriksa berkas...</p>';
+  let r;
+  try { r = await nvValidasi(jenis, await file.text()); }
+  catch (e) { hasil.innerHTML = '<p class="nv-err">Gagal memeriksa: ' + esc(e.message) + '</p>'; return; }
+  if (r.error) { hasil.innerHTML = '<p class="nv-err">' + esc(r.error) + '</p>'; return; }
+
+  _nvBaris[jenis] = r.baris;
+  let html = `<p><strong>${r.baris.length}</strong> baris siap diimpor dari ${r.total} baris data` +
+    (r.masalah.length ? `, <strong style="color:#b91c1c;">${r.masalah.length}</strong> baris bermasalah (tidak akan diimpor)` : '') +
+    (r.duplikat ? `, ${r.duplikat} baris ganda (dipakai yang terakhir)` : '') + '.</p>';
+  if (r.masalah.length) {
+    html += '<div class="nv-masalah"><strong>Baris bermasalah:</strong><ul>' +
+      r.masalah.slice(0, 12).map(m => `<li>Baris ${m.no}: ${esc(m.pesan)}</li>`).join('') +
+      (r.masalah.length > 12 ? `<li>...dan ${r.masalah.length - 12} lainnya</li>` : '') + '</ul></div>';
+  }
+  if (r.baris.length) {
+    html += '<p style="margin:8px 0 4px;font-size:12.5px;color:#64748b;">Contoh baris pertama: ' + esc(r.baris[0]._nama) + ' - ' +
+      (jenis === 'raport' ? esc(r.baris[0].mapel) + ' = ' + esc(r.baris[0].nilai) : esc(r.baris[0].bulan.slice(0, 7))) + '</p>' +
+      `<button class="btn btn-sm btn-primary" id="nv-impor-${jenis}" onclick="imporSekarang('${jenis}')"><i class="fas fa-upload"></i> Impor ${r.baris.length} baris</button>`;
+  }
+  hasil.innerHTML = html;
+}
+
+async function imporSekarang(jenis) {
+  const baris = _nvBaris[jenis];
+  const hasil = document.getElementById('nv-hasil-' + jenis);
+  if (!baris || !baris.length) return;
+  const sem = (document.getElementById('nv-semester').value || '').trim();
+  if (jenis === 'raport' && !sem) { alert('Semester belum diisi.'); return; }
+  if (!confirm('Impor ' + baris.length + ' baris? Data dengan santri dan ' + (jenis === 'raport' ? 'mata pelajaran + semester' : 'bulan') + ' yang sama akan ditimpa.')) return;
+
+  const tombol = document.getElementById('nv-impor-' + jenis);
+  if (tombol) { tombol.disabled = true; tombol.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengimpor...'; }
+
+  const tabel = jenis === 'raport' ? 'eraport' : 'lbs_bulanan';
+  const konflik = jenis === 'raport' ? 'santri_id,semester,mapel' : 'santri_id,bulan';
+  const kirim = baris.map(b => { const o = Object.assign({}, b); delete o._nama; if (jenis === 'raport') o.semester = sem; return o; });
+  let berhasil = 0;
+  for (let i = 0; i < kirim.length; i += 200) {
+    const potong = kirim.slice(i, i + 200);
+    const { error } = await supabaseClient.from(tabel).upsert(potong, { onConflict: konflik });
+    if (error) {
+      hasil.innerHTML = `<p class="nv-err">Impor berhenti setelah ${berhasil} baris: ${esc(error.message)}. Baris yang sudah masuk tidak dibatalkan; impor ulang berkas yang sama aman dilakukan karena data akan ditimpa, bukan digandakan.</p>`;
+      return;
+    }
+    berhasil += potong.length;
+  }
+  _nvBaris[jenis] = null;
+  hasil.innerHTML = `<p style="color:#15803d;font-weight:600;"><i class="fas fa-circle-check"></i> ${berhasil} baris berhasil diimpor.</p>`;
+}
+
+function nvUnduh(nama, isi) {
+  const blob = new Blob(['\uFEFF' + isi], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nama; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function unduhTemplate(jenis) {
+  if (jenis === 'raport') nvUnduh('template-nilai-eraport.csv', 'nis,mapel,nilai,predikat\ncontohnis,Matematika,85,B\ncontohnis,Bahasa Arab,90,A\n');
+  else nvUnduh('template-laporan-bulanan.csv', 'nis,bulan,kehadiran_persen,juz_hafalan,nilai_akhlak,catatan\ncontohnis,2026-10,98,2.5,A,"Hafalan meningkat, tetap pertahankan"\n');
+}
+
+async function unduhDaftarSantri() {
+  try {
+    const santri = await nvMuatSantri(true);
+    if (!santri.length) { alert('Belum ada data santri.'); return; }
+    nvUnduh('daftar-santri.csv', 'nis,nama,kelas\n' + santri.map(s => [s.nis, s.nama, s.kelas || ''].map(csvAman).join(',')).join('\n') + '\n');
+  } catch (e) { alert('Gagal memuat daftar santri: ' + e.message); }
+}
+
+/* =========================================================
+   KELOLA KONTEN: berita, pengumuman, prestasi, galeri, karya santri
+   ========================================================= */
+const KT_TINGKAT = ['Sekolah', 'Kecamatan', 'Kota', 'Provinsi', 'Nasional', 'Internasional'];
+const KT_MEDALI = ['Emas', 'Perak', 'Perunggu', 'Lainnya'];
+const KT_CFG = {
+  berita: { label: 'Berita', judul: 'Judul Berita', foto: 'opsional', fields: [
+    { k: 'kategori', l: 'Kategori', t: 'text', max: 60, list: ['Kegiatan', 'Akademik', 'Kewirausahaan', 'Organisasi', 'Prestasi', 'Umum'] },
+    { k: 'ringkasan', l: 'Ringkasan (tampil di kartu beranda)', t: 'textarea', max: 400, rows: 3 },
+    { k: 'isi', l: 'Isi Berita', t: 'textarea', max: 20000, rows: 10, wajib: true } ] },
+  pengumuman: { label: 'Pengumuman', judul: 'Judul Pengumuman', foto: 'tidak', fields: [
+    { k: 'isi', l: 'Isi Pengumuman', t: 'textarea', max: 20000, rows: 8, wajib: true } ] },
+  prestasi: { label: 'Prestasi', judul: 'Nama Prestasi / Kejuaraan', foto: 'opsional', fields: [
+    { k: 'nama_terkait', l: 'Nama Peraih', t: 'text', max: 150, wajib: true },
+    { k: 'kelas', l: 'Kelas', t: 'text', max: 30 },
+    { k: 'tingkat', l: 'Tingkat', t: 'select', opsi: KT_TINGKAT, wajib: true },
+    { k: 'medali', l: 'Medali / Juara', t: 'select', opsi: KT_MEDALI, wajib: true },
+    { k: 'isi', l: 'Keterangan', t: 'textarea', max: 20000, rows: 5 } ] },
+  galeri: { label: 'Galeri', judul: 'Keterangan Foto', foto: 'wajib', fields: [
+    { k: 'kategori', l: 'Album / Kategori', t: 'text', max: 60 } ] },
+  alumni: { label: 'Alumni', judul: 'Nama Alumni', foto: 'opsional', fields: [
+    { k: 'kategori', l: 'Melanjutkan di / Profesi (contoh: Universitas Brawijaya Malang)', t: 'text', max: 60, wajib: true },
+    { k: 'kelas', l: 'Angkatan / Tahun Lulus (opsional)', t: 'text', max: 30 },
+    { k: 'isi', l: 'Kisah / Kesan (opsional)', t: 'textarea', max: 20000, rows: 5 } ] },
+  karya: { label: 'Karya Santri', judul: 'Judul Karya', foto: 'opsional', fields: [
+    { k: 'nama_terkait', l: 'Nama Santri', t: 'text', max: 150, wajib: true },
+    { k: 'kelas', l: 'Kelas', t: 'text', max: 30 },
+    { k: 'kategori', l: 'Kategori', t: 'text', max: 60, list: ['Kewirausahaan', 'Tulisan', 'Seni', 'Teknologi'] },
+    { k: 'isi', l: 'Deskripsi', t: 'textarea', max: 20000, rows: 5 },
+    { k: 'tautan', l: 'Tautan (opsional, diawali https://)', t: 'url', max: 500 } ] }
+};
+const KT_SEMUA_KOLOM = ['ringkasan', 'isi', 'kategori', 'nama_terkait', 'kelas', 'tingkat', 'medali', 'tautan'];
+let ktJenis = 'berita', ktRows = [], ktEdit = null, ktSedangSimpan = false;
+
+function ktHariIni() { return new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+
+function ktUUID() {
+  const b = new Uint8Array(16); crypto.getRandomValues(b);
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b).map(x => x.toString(16).padStart(2, '0')).join('');
+  return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+}
+
+function ktKompres(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let sisi = 1600, mutu = 0.85;
+      const coba = () => {
+        const skala = Math.min(1, sisi / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * skala)); c.height = Math.max(1, Math.round(img.height * skala));
+        const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => {
+          if (!b) return reject(new Error('Gambar tidak dapat diproses'));
+          if (b.size <= 2.5 * 1024 * 1024 || sisi <= 800) resolve(b); else { sisi = Math.round(sisi * 0.75); mutu = Math.max(0.5, mutu - 0.1); coba(); }
+        }, 'image/jpeg', mutu);
+      };
+      coba();
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Berkas bukan gambar yang valid')); };
+    img.src = url;
+  });
+}
+
+function ktPilihJenis(j) {
+  ktJenis = j;
+  document.querySelectorAll('.kt-chip').forEach(b => b.classList.toggle('aktif', b.dataset.j === j));
+  ktMuat();
+}
+
+async function ktMuat() {
+  const box = document.getElementById('kt-list');
+  box.innerHTML = '<p style="color:#64748b;">Memuat...</p>';
+  const { data, error } = await supabaseClient.from('konten').select('*').eq('jenis', ktJenis)
+    .order('tanggal', { ascending: false }).order('id', { ascending: false }).limit(500);
+  if (error) { box.innerHTML = '<p style="color:#dc2626;font-weight:600;">Konten belum dapat dimuat: ' + esc(error.message) + '. Pastikan SQL tabel konten sudah dijalankan.</p>'; return; }
+  ktRows = data || []; ktRender();
+}
+
+function ktRender() {
+  const box = document.getElementById('kt-list');
+  const cfg = KT_CFG[ktJenis];
+  const terbit = ktRows.filter(r => r.terbit).length;
+  document.getElementById('kt-ringkas').textContent = cfg.label + ': ' + ktRows.length + ' item, ' + terbit + ' terbit, ' + (ktRows.length - terbit) + ' draf';
+  if (!ktRows.length) { box.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;"><i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:10px;"></i>Belum ada ' + esc(cfg.label.toLowerCase()) + '. Klik <strong>Tambah</strong> untuk membuat yang pertama.</div>'; return; }
+  box.innerHTML = ktRows.map(r => {
+    const meta = [fmtTanggalPendek(r.tanggal), r.nama_terkait, r.kategori].filter(Boolean).join(' · ');
+    const thumb = r.foto_url ? '<img src="' + esc(r.foto_url) + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;">'
+                             : '<div style="width:56px;height:56px;border-radius:8px;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-image"></i></div>';
+    return '<div class="kt-row">' + thumb +
+      '<div style="flex:1;min-width:0;"><div style="font-weight:700;color:#0a1f44;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;">' + esc(r.judul) + '</div>' +
+      '<div style="font-size:12.5px;color:#64748b;margin-top:2px;">' + esc(meta) + '</div></div>' +
+      '<span class="kt-badge ' + (r.terbit ? 'terbit' : 'draf') + '">' + (r.terbit ? 'Terbit' : 'Draf') + '</span>' +
+      '<button class="icon-btn" title="' + (r.terbit ? 'Jadikan draf (sembunyikan)' : 'Terbitkan') + '" onclick="ktToggle(' + Number(r.id) + ')"><i class="fas ' + (r.terbit ? 'fa-eye' : 'fa-eye-slash') + '"></i></button>' +
+      '<button class="icon-btn" title="Ubah" onclick="ktBuka(' + Number(r.id) + ')"><i class="fas fa-pen"></i></button>' +
+      '<button class="icon-btn" title="Hapus" onclick="ktHapus(' + Number(r.id) + ')"><i class="fas fa-trash"></i></button></div>';
+  }).join('');
+}
+
+function fmtTanggalPendek(v) {
+  const d = new Date(String(v).slice(0, 10) + 'T00:00:00');
+  return isNaN(d) ? '' : d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function ktBuka(id) {
+  const cfg = KT_CFG[ktJenis];
+  const r = id ? ktRows.find(x => x.id === id) : null;
+  ktEdit = r || null;
+  const v = k => (r && r[k] != null ? r[k] : '');
+  const alat = cfg.fields.map(f => {
+    const idf = 'kt-f-' + f.k;
+    let input;
+    if (f.t === 'textarea') input = '<textarea id="' + idf + '" rows="' + (f.rows || 4) + '" maxlength="' + f.max + '">' + esc(v(f.k)) + '</textarea>';
+    else if (f.t === 'select') input = '<select id="' + idf + '"><option value="">-- Pilih --</option>' + f.opsi.map(o => '<option' + (v(f.k) === o ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
+    else input = '<input id="' + idf + '" type="' + (f.t === 'url' ? 'url' : 'text') + '" maxlength="' + f.max + '" value="' + esc(v(f.k)) + '"' + (f.list ? ' list="' + idf + '-dl"' : '') + '>' +
+                 (f.list ? '<datalist id="' + idf + '-dl">' + f.list.map(o => '<option value="' + esc(o) + '">').join('') + '</datalist>' : '');
+    return '<div class="kt-f"><label for="' + idf + '">' + esc(f.l) + (f.wajib ? ' *' : '') + '</label>' + input + '</div>';
+  }).join('');
+
+  const fotoBlok = cfg.foto === 'tidak' ? '' :
+    '<div class="kt-f"><label for="kt-f-foto">Foto' + (cfg.foto === 'wajib' ? ' *' : ' (opsional)') + '</label>' +
+    (r && r.foto_url ? '<div id="kt-foto-lama"><img src="' + esc(r.foto_url) + '" alt="" style="max-width:180px;max-height:140px;border-radius:8px;display:block;margin-bottom:6px;"><label style="font-weight:400;font-size:13px;"><input type="checkbox" id="kt-f-hapusfoto"> Hapus foto ini</label></div>' : '') +
+    '<input type="file" id="kt-f-foto" accept="image/jpeg,image/png,image/webp"><div id="kt-foto-pratinjau"></div>' +
+    '<small style="color:#64748b;display:block;margin-top:4px;">Format JPG/PNG/WebP. Ukuran otomatis dikecilkan sebelum diunggah.</small></div>';
+
+  document.getElementById('kt-form').innerHTML =
+    '<div class="modal-head"><h3>' + (r ? 'Ubah ' : 'Tambah ') + esc(cfg.label) + '</h3><button class="icon-btn" onclick="ktTutup()" title="Tutup"><i class="fas fa-xmark"></i></button></div>' +
+    '<div class="kt-f"><label for="kt-f-judul">' + esc(cfg.judul) + ' *</label><input id="kt-f-judul" type="text" maxlength="200" value="' + esc(v('judul')) + '"></div>' +
+    '<div class="kt-f"><label for="kt-f-tanggal">Tanggal *</label><input id="kt-f-tanggal" type="date" value="' + esc(r ? String(r.tanggal).slice(0, 10) : ktHariIni()) + '"></div>' +
+    alat + fotoBlok +
+    '<div class="kt-f"><label style="font-weight:600;"><input type="checkbox" id="kt-f-terbit"' + (!r || r.terbit ? ' checked' : '') + '> Terbitkan (tampil di situs)</label></div>' +
+    '<p id="kt-galat" style="display:none;color:#b91c1c;font-size:13.5px;font-weight:600;margin:6px 0;"></p>' +
+    '<div style="display:flex;gap:10px;margin-top:14px;"><button class="btn btn-primary" id="kt-simpan" onclick="ktSimpan()"><i class="fas fa-floppy-disk"></i> Simpan</button><button class="btn btn-outline" onclick="ktTutup()">Batal</button></div>';
+
+  const inp = document.getElementById('kt-f-foto');
+  if (inp) inp.addEventListener('change', () => {
+    const f = inp.files && inp.files[0];
+    document.getElementById('kt-foto-pratinjau').innerHTML = f ? '<img src="' + esc(URL.createObjectURL(f)) + '" alt="" style="max-width:180px;max-height:140px;border-radius:8px;margin-top:8px;">' : '';
+  });
+  document.getElementById('kt-modal').style.display = 'flex';
+}
+
+function ktTutup() { document.getElementById('kt-modal').style.display = 'none'; document.getElementById('kt-form').innerHTML = ''; ktEdit = null; }
+function ktGalat(t) { const e = document.getElementById('kt-galat'); if (e) { e.textContent = t || ''; e.style.display = t ? 'block' : 'none'; } }
+function ktBaru() { ktBuka(0); }
+
+async function ktSimpan() {
+  if (ktSedangSimpan) return;
+  const cfg = KT_CFG[ktJenis];
+  const ambil = k => { const el = document.getElementById('kt-f-' + k); return el ? el.value.trim() : ''; };
+  const judul = ambil('judul'), tanggal = ambil('tanggal');
+  if (judul.length < 3) return ktGalat('Judul minimal 3 karakter.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) return ktGalat('Tanggal belum diisi.');
+  const data = {};
+  for (const f of cfg.fields) {
+    const val = ambil(f.k);
+    if (f.wajib && !val) return ktGalat(f.l + ' wajib diisi.');
+    if (f.t === 'url' && val && !/^https?:\/\//i.test(val)) return ktGalat(f.l + ' harus diawali http:// atau https://.');
+    data[f.k] = val || null;
+  }
+  const inp = document.getElementById('kt-f-foto');
+  const berkas = inp && inp.files && inp.files[0];
+  const hapusFoto = !!(document.getElementById('kt-f-hapusfoto') && document.getElementById('kt-f-hapusfoto').checked);
+  const adaFotoLama = !!(ktEdit && ktEdit.foto_url) && !hapusFoto;
+  if (cfg.foto === 'wajib' && !berkas && !adaFotoLama) return ktGalat('Foto wajib diisi.');
+  if (berkas && berkas.size > 20 * 1024 * 1024) return ktGalat('Ukuran foto maksimal 20 MB.');
+
+  ktGalat(''); ktSedangSimpan = true;
+  const btn = document.getElementById('kt-simpan'); btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+  const selesai = () => { ktSedangSimpan = false; btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Simpan'; };
+
+  let fotoUrl = ktEdit ? ktEdit.foto_url : null, fotoPath = ktEdit ? ktEdit.foto_path : null, pathBaru = null;
+  try {
+    if (berkas) {
+      const blob = await ktKompres(berkas);
+      pathBaru = ktJenis + '/' + ktUUID() + '.jpg';
+      const up = await supabaseClient.storage.from('konten').upload(pathBaru, blob, { contentType: 'image/jpeg', upsert: false });
+      if (up.error) { pathBaru = null; selesai(); return ktGalat('Foto gagal diunggah: ' + up.error.message + '. Pastikan SQL penyimpanan foto sudah dijalankan.'); }
+      fotoUrl = supabaseClient.storage.from('konten').getPublicUrl(pathBaru).data.publicUrl; fotoPath = pathBaru;
+    } else if (hapusFoto) { fotoUrl = null; fotoPath = null; }
+
+    const payload = { jenis: ktJenis, judul, tanggal, terbit: document.getElementById('kt-f-terbit').checked, foto_url: fotoUrl, foto_path: fotoPath, updated_at: new Date().toISOString() };
+    KT_SEMUA_KOLOM.forEach(k => { payload[k] = k in data ? data[k] : null; });
+
+    const res = ktEdit ? await supabaseClient.from('konten').update(payload).eq('id', ktEdit.id)
+                       : await supabaseClient.from('konten').insert([payload]);
+    if (res.error) {
+      if (pathBaru) await supabaseClient.storage.from('konten').remove([pathBaru]);
+      selesai(); return ktGalat('Gagal menyimpan: ' + res.error.message);
+    }
+    const lama = ktEdit && ktEdit.foto_path && ktEdit.foto_path !== fotoPath ? ktEdit.foto_path : null;
+    if (lama) await supabaseClient.storage.from('konten').remove([lama]);
+  } catch (e) { selesai(); return ktGalat('Terjadi kesalahan: ' + e.message); }
+
+  selesai(); ktTutup(); await ktMuat();
+}
+
+async function ktToggle(id) {
+  const r = ktRows.find(x => x.id === id); if (!r) return;
+  const { error } = await supabaseClient.from('konten').update({ terbit: !r.terbit, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { alert('Gagal mengubah status: ' + error.message); return; }
+  r.terbit = !r.terbit; ktRender();
+}
+
+async function ktHapus(id) {
+  const r = ktRows.find(x => x.id === id); if (!r) return;
+  if (!confirm('Hapus "' + r.judul + '" secara permanen? Foto yang terkait juga akan dihapus.')) return;
+  const { error } = await supabaseClient.from('konten').delete().eq('id', id);
+  if (error) { alert('Gagal menghapus: ' + error.message); return; }
+  if (r.foto_path) await supabaseClient.storage.from('konten').remove([r.foto_path]);
+  ktRows = ktRows.filter(x => x.id !== id); ktRender();
+}
+
+function fmtWaktu(v) {
+  return v ? new Date(v).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+}
+
+function tesBlokHtml(id) {
+  const t = tesMap[id];
+  let baris;
+  if (!t) {
+    baris = `<tr><td>Status</td><td>Belum mengerjakan</td></tr>`;
+  } else {
+    baris = `<tr><td>Status</td><td>${t.selesai_at ? 'Selesai' : 'Sedang mengerjakan / belum dikirim'}</td></tr>` +
+      `<tr><td>Skor</td><td>${t.selesai_at ? esc(t.skor) : '-'}</td></tr>` +
+      `<tr><td>Jawaban benar</td><td>${t.selesai_at ? esc(t.benar) + ' dari ' + esc(t.total) : '-'}</td></tr>` +
+      `<tr><td>Mulai</td><td>${esc(fmtWaktu(t.mulai_at))}</td></tr>` +
+      `<tr><td>Selesai</td><td>${esc(fmtWaktu(t.selesai_at))}</td></tr>` +
+      `<tr><td>Dikirim otomatis (waktu habis)</td><td>${t.selesai_at ? (t.otomatis ? 'Ya' : 'Tidak') : '-'}</td></tr>`;
+  }
+  return `<div class="modal-sec">Hasil Tes Masuk</div><table>${baris}</table>` +
+    (t ? `<button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="resetTes('${esc(id)}')"><i class="fas fa-rotate-left"></i> Reset tes (izinkan mengulang)</button>` : '');
+}
+
+async function resetTes(id) {
+  if (!confirm('Reset tes peserta ini? Jawaban dan skor akan dihapus, dan peserta dapat mengerjakan dari awal dengan waktu penuh.')) return;
+  const { error } = await supabaseClient.from('tes_sesi').delete().eq('pendaftar_id', id);
+  if (error) { alert('Gagal mereset: ' + error.message); return; }
+  await muatHasilTes();
+  renderTable();
+  showDetail(id);
+}
+
+function showDetail(id) {
+  const r = allRows.find(x => x.id === id);
+  if (!r) return;
+  const grup = DETAIL_GROUPS.map(([judul, kolom]) =>
+    `<div class="modal-sec">${esc(judul)}</div><table>` +
+    kolom.map(([k, label]) => `<tr><td>${esc(label)}</td><td>${(k === 'persetujuan_at' ? esc(r[k] ? fmtWaktu(r[k]) : '-') : esc(r[k] == null || r[k] === '' ? '-' : r[k]))}</td></tr>`).join('') +
+    `</table>`).join('');
+  const bukti = r.bukti_bayar_path
+    ? `<button class="btn btn-outline btn-sm" id="btn-bukti" onclick="lihatBukti('${esc(r.bukti_bayar_path)}')"><i class="fas fa-image"></i> Lihat Bukti Pembayaran</button><div id="bukti-wrap"></div>`
+    : `<p style="color:#b45309;font-size:13px;">Bukti pembayaran tidak ada.</p>`;
+  document.getElementById('modal-content').innerHTML =
+    `<div class="modal-head"><h3>${esc(r.nama || '-')} <small style="color:#64748b;font-weight:500;">· ${esc(r.no_pendaftaran || '')}</small></h3>
+     <button class="icon-btn" onclick="closeDetail()" title="Tutup"><i class="fas fa-xmark"></i></button></div>` +
+    grup + tesBlokHtml(id) + `<div style="margin-top:12px;">${bukti}</div>`;
+  document.getElementById('detail-modal').style.display = 'flex';
+}
+
+function closeDetail() {
+  document.getElementById('detail-modal').style.display = 'none';
+  document.getElementById('modal-content').innerHTML = '';
+}
+
+async function lihatBukti(path) {
+  const btn = document.getElementById('btn-bukti');
+  const wrap = document.getElementById('bukti-wrap');
+  btn.disabled = true;
+  const { data, error } = await supabaseClient.storage.from('bukti-indent').createSignedUrl(path, 300);
+  btn.disabled = false;
+  if (error || !data) { wrap.innerHTML = '<p style="color:#dc2626;font-size:13px;">Gagal membuka bukti: ' + esc(error ? error.message : 'tidak ditemukan') + '</p>'; return; }
+  wrap.innerHTML = `<a href="${esc(data.signedUrl)}" target="_blank" rel="noopener"><img class="bukti-img" src="${esc(data.signedUrl)}" alt="Bukti pembayaran"></a>
+    <p style="font-size:12px;color:#64748b;margin-top:6px;">Tautan hanya berlaku 5 menit. Klik gambar untuk membuka ukuran penuh.</p>`;
+}
+</script>
+</body>
+</html>
