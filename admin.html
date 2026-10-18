@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1"></script>
 <style>
   :root{
     --navy:#0a1f44; --blue:#1a4faf; --gold:#c8922a; --gold-light:#e9b84a;
@@ -274,6 +274,12 @@
         <button class="kt-chip" data-j="galeri" onclick="ktPilihJenis('galeri')">Galeri</button>
         <button class="kt-chip" data-j="karya" onclick="ktPilihJenis('karya')">Karya Santri</button>
         <button class="kt-chip" data-j="alumni" onclick="ktPilihJenis('alumni')">Alumni</button>
+    <button class="kt-chip" data-j="agenda" onclick="ktPilihJenis('agenda')">Agenda</button>
+    <button class="kt-chip" data-j="guru" onclick="ktPilihJenis('guru')">Tenaga Pendidik</button>
+    <button class="kt-chip" data-j="ekskul" onclick="ktPilihJenis('ekskul')">Ekskul</button>
+    <button class="kt-chip" data-j="biaya" onclick="ktPilihJenis('biaya')">Biaya PSB</button>
+    <button class="kt-chip" data-j="rekening" onclick="ktPilihJenis('rekening')">Rekening PSB</button>
+    <button class="kt-chip" data-j="sambutan" onclick="ktPilihJenis('sambutan')">Sambutan Mudir</button>
       </div>
       <div class="toolbar">
         <div id="kt-ringkas" style="font-size:14px;color:#64748b;"></div>
@@ -807,7 +813,7 @@ const KT_CFG = {
     { k: 'medali', l: 'Medali / Juara', t: 'select', opsi: KT_MEDALI, wajib: true },
     { k: 'isi', l: 'Keterangan', t: 'textarea', max: 20000, rows: 5 } ] },
   galeri: { label: 'Galeri', judul: 'Keterangan Foto', foto: 'wajib', fields: [
-    { k: 'kategori', l: 'Album / Kategori', t: 'text', max: 60 } ] },
+    { k: 'kategori', l: 'Album / Kategori (untuk foto ekskul, isi dengan nama ekskul yang sama persis)', t: 'text', max: 60, list: ['Hisbul Wathan', 'Futsal', 'Beladiri Tapak Suci', 'Basket', 'Voli', 'Badminton'] } ] },
   alumni: { label: 'Alumni', judul: 'Nama Alumni', foto: 'opsional', fields: [
     { k: 'kategori', l: 'Melanjutkan di / Profesi (contoh: Universitas Brawijaya Malang)', t: 'text', max: 60, wajib: true },
     { k: 'kelas', l: 'Angkatan / Tahun Lulus (opsional)', t: 'text', max: 30 },
@@ -817,7 +823,35 @@ const KT_CFG = {
     { k: 'kelas', l: 'Kelas', t: 'text', max: 30 },
     { k: 'kategori', l: 'Kategori', t: 'text', max: 60, list: ['Kewirausahaan', 'Tulisan', 'Seni', 'Teknologi'] },
     { k: 'isi', l: 'Deskripsi', t: 'textarea', max: 20000, rows: 5 },
-    { k: 'tautan', l: 'Tautan (opsional, diawali https://)', t: 'url', max: 500 } ] }
+    { k: 'tautan', l: 'Tautan (opsional, diawali https://)', t: 'url', max: 500 } ] },
+  agenda: { label: 'Agenda', judul: 'Nama Kegiatan', foto: 'tidak', tglLabel: 'Tanggal mulai (dipakai untuk mengurutkan agenda)', urut: 'asc', fields: [
+    { k: 'kategori', l: 'Waktu pelaksanaan yang ditampilkan (contoh: September – Desember 2026)', t: 'text', max: 80, wajib: true },
+    { k: 'isi', l: 'Keterangan (opsional)', t: 'textarea', max: 2000, rows: 4 } ] },
+  guru: { label: 'Tenaga Pendidik', judul: 'Nama Lengkap (beserta gelar)', foto: 'opsional', tglLabel: null, urut: 'urutan', fields: [
+    { k: 'nama_terkait', l: 'Kelompok', t: 'select', opsi: ['Tenaga Pendidik', 'Tenaga Kependidikan'], wajib: true },
+    { k: 'kategori', l: 'Jabatan / mata pelajaran (contoh: Guru Matematika)', t: 'text', max: 80 },
+    { k: 'urutan', l: 'Nomor urut tampil (1 = paling atas)', t: 'number', max: 4 },
+    { k: 'isi', l: 'Motto / kutipan (opsional)', t: 'textarea', max: 300, rows: 2 } ] },
+  ekskul: { label: 'Ekskul', judul: 'Nama Ekstrakurikuler', foto: 'opsional', tglLabel: null, urut: 'urutan',
+    catatan: 'Foto di atas menjadi foto sampul. Foto kegiatan ekskul ditambahkan di tab Galeri: isi kolom Album dengan nama ekskul yang SAMA PERSIS dengan judul di sini.', fields: [
+    { k: 'kategori', l: 'Ikon (satu emoji, contoh: ⚽)', t: 'text', max: 8 },
+    { k: 'urutan', l: 'Nomor urut tampil (1 = paling atas)', t: 'number', max: 4 },
+    { k: 'isi', l: 'Deskripsi', t: 'textarea', max: 2000, rows: 5, wajib: true } ] },
+  biaya: { label: 'Biaya PSB', judul: 'Nama Biaya (contoh: Uang Pendaftaran)', foto: 'tidak', tglLabel: null, urut: 'urutan',
+    catatan: 'Total biaya dihitung otomatis dari semua item yang berstatus terbit.', fields: [
+    { k: 'kategori', l: 'Nominal dalam rupiah, hanya angka (contoh: 250000)', t: 'number', max: 12, wajib: true },
+    { k: 'urutan', l: 'Nomor urut tampil (1 = paling atas)', t: 'number', max: 4 },
+    { k: 'isi', l: 'Keterangan di bawah nama biaya (opsional)', t: 'textarea', max: 200, rows: 2 } ] },
+  rekening: { label: 'Rekening PSB', judul: 'Label Rekening (contoh: Rekening Biaya Indent)', foto: 'tidak', tglLabel: null, urut: 'urutan',
+    catatan: 'Yang tampil di formulir PSB adalah rekening berstatus terbit dengan nomor urut terkecil.', fields: [
+    { k: 'kategori', l: 'Nama bank (contoh: BANK BNI KCP MALANG)', t: 'text', max: 60, wajib: true },
+    { k: 'ringkasan', l: 'Nomor rekening', t: 'text', max: 30, wajib: true },
+    { k: 'nama_terkait', l: 'Atas nama', t: 'text', max: 150, wajib: true },
+    { k: 'urutan', l: 'Nomor urut', t: 'number', max: 4 } ] },
+  sambutan: { label: 'Sambutan Mudir', judul: 'Nama Lengkap beserta Gelar', foto: 'opsional', tglLabel: null, urut: 'desc',
+    catatan: 'Yang tampil adalah sambutan terbaru yang berstatus terbit (di beranda, halaman Profil, dan tabel Info Pesantren). Pisahkan paragraf dengan satu baris kosong.', fields: [
+    { k: 'kategori', l: 'Jabatan', t: 'text', max: 60, wajib: true },
+    { k: 'isi', l: 'Isi sambutan', t: 'textarea', max: 20000, rows: 14, wajib: true } ] }
 };
 const KT_SEMUA_KOLOM = ['ringkasan', 'isi', 'kategori', 'nama_terkait', 'kelas', 'tingkat', 'medali', 'tautan'];
 let ktJenis = 'berita', ktRows = [], ktEdit = null, ktSedangSimpan = false;
@@ -836,7 +870,7 @@ function ktKompres(file) {
     const url = URL.createObjectURL(file); const img = new Image();
     img.onload = () => {
       URL.revokeObjectURL(url);
-      let sisi = 1600, mutu = 0.85;
+      let sisi = 1280, mutu = 0.8;
       const coba = () => {
         const skala = Math.min(1, sisi / Math.max(img.width, img.height));
         const c = document.createElement('canvas');
@@ -844,7 +878,7 @@ function ktKompres(file) {
         const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
         c.toBlob(b => {
           if (!b) return reject(new Error('Gambar tidak dapat diproses'));
-          if (b.size <= 2.5 * 1024 * 1024 || sisi <= 800) resolve(b); else { sisi = Math.round(sisi * 0.75); mutu = Math.max(0.5, mutu - 0.1); coba(); }
+          if (b.size <= 350 * 1024 || sisi <= 640) resolve(b); else { sisi = Math.round(sisi * 0.75); mutu = Math.max(0.5, mutu - 0.1); coba(); }
         }, 'image/jpeg', mutu);
       };
       coba();
@@ -863,8 +897,11 @@ function ktPilihJenis(j) {
 async function ktMuat() {
   const box = document.getElementById('kt-list');
   box.innerHTML = '<p style="color:#64748b;">Memuat...</p>';
-  const { data, error } = await supabaseClient.from('konten').select('*').eq('jenis', ktJenis)
-    .order('tanggal', { ascending: false }).order('id', { ascending: false }).limit(500);
+  const cm = KT_CFG[ktJenis];
+  let q = supabaseClient.from('konten').select('*').eq('jenis', ktJenis);
+  q = cm.urut === 'urutan' ? q.order('urutan', { ascending: true, nullsFirst: false }).order('judul', { ascending: true })
+    : q.order('tanggal', { ascending: cm.urut === 'asc' }).order('id', { ascending: false });
+  const { data, error } = await q.limit(500);
   if (error) { box.innerHTML = '<p style="color:#dc2626;font-weight:600;">Konten belum dapat dimuat: ' + esc(error.message) + '. Pastikan SQL tabel konten sudah dijalankan.</p>'; return; }
   ktRows = data || []; ktRender();
 }
@@ -876,7 +913,7 @@ function ktRender() {
   document.getElementById('kt-ringkas').textContent = cfg.label + ': ' + ktRows.length + ' item, ' + terbit + ' terbit, ' + (ktRows.length - terbit) + ' draf';
   if (!ktRows.length) { box.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;"><i class="fas fa-inbox" style="font-size:32px;display:block;margin-bottom:10px;"></i>Belum ada ' + esc(cfg.label.toLowerCase()) + '. Klik <strong>Tambah</strong> untuk membuat yang pertama.</div>'; return; }
   box.innerHTML = ktRows.map(r => {
-    const meta = [fmtTanggalPendek(r.tanggal), r.nama_terkait, r.kategori].filter(Boolean).join(' · ');
+    const meta = [cfg.tglLabel === null ? '' : fmtTanggalPendek(r.tanggal), r.nama_terkait, r.kategori].filter(Boolean).join(' · ');
     const thumb = r.foto_url ? '<img src="' + esc(r.foto_url) + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;">'
                              : '<div style="width:56px;height:56px;border-radius:8px;background:#f1f5f9;color:#94a3b8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-image"></i></div>';
     return '<div class="kt-row">' + thumb +
@@ -904,11 +941,12 @@ function ktBuka(id) {
     let input;
     if (f.t === 'textarea') input = '<textarea id="' + idf + '" rows="' + (f.rows || 4) + '" maxlength="' + f.max + '">' + esc(v(f.k)) + '</textarea>';
     else if (f.t === 'select') input = '<select id="' + idf + '"><option value="">-- Pilih --</option>' + f.opsi.map(o => '<option' + (v(f.k) === o ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
-    else input = '<input id="' + idf + '" type="' + (f.t === 'url' ? 'url' : 'text') + '" maxlength="' + f.max + '" value="' + esc(v(f.k)) + '"' + (f.list ? ' list="' + idf + '-dl"' : '') + '>' +
+    else input = '<input id="' + idf + '" type="' + (f.t === 'url' ? 'url' : f.t === 'number' ? 'number' : 'text') + '" maxlength="' + f.max + '" value="' + esc(v(f.k)) + '"' + (f.list ? ' list="' + idf + '-dl"' : '') + '>' +
                  (f.list ? '<datalist id="' + idf + '-dl">' + f.list.map(o => '<option value="' + esc(o) + '">').join('') + '</datalist>' : '');
     return '<div class="kt-f"><label for="' + idf + '">' + esc(f.l) + (f.wajib ? ' *' : '') + '</label>' + input + '</div>';
   }).join('');
 
+  const catatanHtml = cfg.catatan ? '<p style="font-size:13px;color:#475569;background:#f1f5f9;border-radius:8px;padding:10px 12px;margin:0 0 12px;">' + esc(cfg.catatan) + '</p>' : '';
   const fotoBlok = cfg.foto === 'tidak' ? '' :
     '<div class="kt-f"><label for="kt-f-foto">Foto' + (cfg.foto === 'wajib' ? ' *' : ' (opsional)') + '</label>' +
     (r && r.foto_url ? '<div id="kt-foto-lama"><img src="' + esc(r.foto_url) + '" alt="" style="max-width:180px;max-height:140px;border-radius:8px;display:block;margin-bottom:6px;"><label style="font-weight:400;font-size:13px;"><input type="checkbox" id="kt-f-hapusfoto"> Hapus foto ini</label></div>' : '') +
@@ -918,8 +956,9 @@ function ktBuka(id) {
   document.getElementById('kt-form').innerHTML =
     '<div class="modal-head"><h3>' + (r ? 'Ubah ' : 'Tambah ') + esc(cfg.label) + '</h3><button class="icon-btn" onclick="ktTutup()" title="Tutup"><i class="fas fa-xmark"></i></button></div>' +
     '<div class="kt-f"><label for="kt-f-judul">' + esc(cfg.judul) + ' *</label><input id="kt-f-judul" type="text" maxlength="200" value="' + esc(v('judul')) + '"></div>' +
-    '<div class="kt-f"><label for="kt-f-tanggal">Tanggal *</label><input id="kt-f-tanggal" type="date" value="' + esc(r ? String(r.tanggal).slice(0, 10) : ktHariIni()) + '"></div>' +
-    alat + fotoBlok +
+    (cfg.tglLabel === null ? '<input id="kt-f-tanggal" type="hidden" value="' + esc(r ? String(r.tanggal).slice(0, 10) : ktHariIni()) + '">'
+      : '<div class="kt-f"><label for="kt-f-tanggal">' + esc(cfg.tglLabel || 'Tanggal') + ' *</label><input id="kt-f-tanggal" type="date" value="' + esc(r ? String(r.tanggal).slice(0, 10) : ktHariIni()) + '"></div>') +
+    catatanHtml + alat + fotoBlok +
     '<div class="kt-f"><label style="font-weight:600;"><input type="checkbox" id="kt-f-terbit"' + (!r || r.terbit ? ' checked' : '') + '> Terbitkan (tampil di situs)</label></div>' +
     '<p id="kt-galat" style="display:none;color:#b91c1c;font-size:13.5px;font-weight:600;margin:6px 0;"></p>' +
     '<div style="display:flex;gap:10px;margin-top:14px;"><button class="btn btn-primary" id="kt-simpan" onclick="ktSimpan()"><i class="fas fa-floppy-disk"></i> Simpan</button><button class="btn btn-outline" onclick="ktTutup()">Batal</button></div>';
@@ -948,6 +987,7 @@ async function ktSimpan() {
     const val = ambil(f.k);
     if (f.wajib && !val) return ktGalat(f.l + ' wajib diisi.');
     if (f.t === 'url' && val && !/^https?:\/\//i.test(val)) return ktGalat(f.l + ' harus diawali http:// atau https://.');
+    if (f.t === 'number' && val && !new RegExp('^\\d{1,' + (f.max || 4) + '}$').test(val)) return ktGalat(f.l + ' harus berupa angka bulat.');
     data[f.k] = val || null;
   }
   const inp = document.getElementById('kt-f-foto');
@@ -973,6 +1013,7 @@ async function ktSimpan() {
 
     const payload = { jenis: ktJenis, judul, tanggal, terbit: document.getElementById('kt-f-terbit').checked, foto_url: fotoUrl, foto_path: fotoPath, updated_at: new Date().toISOString() };
     KT_SEMUA_KOLOM.forEach(k => { payload[k] = k in data ? data[k] : null; });
+    if ('urutan' in data) payload.urutan = data.urutan == null ? null : Number(data.urutan);
 
     const res = ktEdit ? await supabaseClient.from('konten').update(payload).eq('id', ktEdit.id)
                        : await supabaseClient.from('konten').insert([payload]);

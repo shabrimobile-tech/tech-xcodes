@@ -35,7 +35,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1"></script>
+<script>(function(){try{if(sessionStorage.getItem('pemSplash'))document.documentElement.classList.add('no-splash')}catch(e){}})();</script>
+<link rel="preload" as="image" imagesrcset="img/hero-cordova-800.jpg 800w, img/hero-cordova-1280.jpg 1280w, img/hero-cordova-1600.jpg 1600w" imagesizes="100vw" fetchpriority="high">
 <style>
   :root {
     --navy: #0a1f44;
@@ -943,6 +945,47 @@
   }
   .wa-float:hover::after { opacity: 1; }
   @media print { .wa-float { display: none !important; } }
+
+/* ===== ANIMASI PEMBUKA (tampil sekali per kunjungan) ===== */
+#splash{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:30px;
+  background:radial-gradient(circle at 50% 42%,#fff3e5 0,#ffffff 62%);overscroll-behavior:contain;touch-action:none;cursor:pointer;
+  animation:splashCadangan .5s ease 5s forwards;}
+.no-splash #splash{display:none;}
+#splash .splash-logo{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2vw,20px);width:min(90vw,720px);}
+#splash .splash-icon{flex:0 0 33%;width:33%;height:auto;opacity:0;transform:scale(.35) rotate(-16deg);
+  animation:splashIkon .95s cubic-bezier(.2,1.3,.3,1) .15s forwards;}
+#splash .splash-word{flex:0 0 62%;width:62%;height:auto;opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-26px);
+  animation:splashTulisan 1s cubic-bezier(.22,.8,.25,1) .8s forwards;}
+#splash .splash-bar{width:min(56vw,250px);height:3px;border-radius:3px;background:rgba(255,143,47,.2);overflow:hidden;opacity:0;
+  animation:splashMuncul .3s ease .6s forwards;}
+#splash .splash-bar span{display:block;width:100%;height:100%;background:#ff8f2f;transform:scaleX(0);transform-origin:left center;
+  animation:splashBar 1.9s cubic-bezier(.4,0,.2,1) .6s forwards;}
+#splash.keluar{animation:none;transform:translateY(-100%);transition:transform .85s cubic-bezier(.77,0,.18,1);}
+#splash.keluar .splash-logo,#splash.keluar .splash-bar{opacity:0;transform:scale(.94);transition:opacity .4s ease,transform .6s ease;}
+@media (max-width:600px){
+  #splash .splash-logo{flex-direction:column;gap:14px;}
+  #splash .splash-icon{flex:none;width:34vw;max-width:150px;}
+  #splash .splash-word{flex:none;width:80vw;max-width:340px;}
+}
+@media (prefers-reduced-motion:reduce){#splash{display:none!important;}}
+@keyframes splashIkon{0%{opacity:0;transform:scale(.35) rotate(-16deg);}60%{opacity:1;}100%{opacity:1;transform:scale(1) rotate(0);}}
+@keyframes splashTulisan{0%{opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-26px);}100%{opacity:1;clip-path:inset(0 0 0 0);transform:translateX(0);}}
+@keyframes splashMuncul{to{opacity:1;}}
+@keyframes splashBar{to{transform:scaleX(1);}}
+@keyframes splashCadangan{to{opacity:0;visibility:hidden;pointer-events:none;}}
+
+/* ===== FOTO LATAR SLIDER (teks tetap terbaca) ===== */
+.slide-foto .slide-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.slide-foto .slide-overlay{background:linear-gradient(90deg,rgba(8,22,52,.93) 0%,rgba(8,22,52,.82) 36%,rgba(8,22,52,.42) 66%,rgba(8,22,52,.12) 100%),linear-gradient(0deg,rgba(8,22,52,.6) 0%,rgba(8,22,52,0) 40%);}
+.slide-foto .slide-title{text-shadow:0 2px 18px rgba(0,0,0,.6);}
+.slide-foto .slide-subtitle{color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.65);}
+@media (max-width:768px){.slide-foto .slide-overlay{background:linear-gradient(0deg,rgba(8,22,52,.95) 0%,rgba(8,22,52,.8) 50%,rgba(8,22,52,.4) 100%);}
+  .slider-nav{top:16px;transform:none;padding:0 12px;}.slider-btn{width:36px;height:36px;font-size:13px;}}
+/* ===== ANIMASI MUNCUL SAAT DIGULIR ===== */
+.rv-aktif .rv{opacity:0;transform:translateY(30px);transition:opacity .75s ease,transform .75s cubic-bezier(.22,.8,.25,1);transition-delay:var(--rv-d,0ms);will-change:opacity,transform;}
+.rv-aktif .rv.rv-zoom{transform:translateY(16px) scale(.93);}
+.rv-aktif .rv.rv-on{opacity:1;transform:none;}
+@media print{.rv-aktif .rv{opacity:1!important;transform:none!important;transition:none!important;}}
 </style>
 <script type="application/ld+json">
 {
@@ -954,10 +997,10 @@
   "logo": "https://pemgondanglegi.sch.id/img/logo-512.png",
   "image": "https://pemgondanglegi.sch.id/img/og-image.jpg",
   "telephone": "+62-813-3044-9182",
-  "email": "gondanglegippem@gmail.com",
+  "email": "pemgondanglegi@gmail.com",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Jl. MT. Hariyono No.1",
+    "streetAddress": "Jl. MT. Haryono No.1",
     "addressLocality": "Gondanglegi",
     "addressRegion": "Jawa Timur",
     "addressCountry": "ID"
@@ -972,13 +1015,38 @@
 </script>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <div class="splash-logo">
+    <img class="splash-icon" src="data:image/png;base64,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" alt="" width="300" height="293" decoding="async">
+    <img class="splash-word" src="data:image/png;base64,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" alt="" width="612" height="318" decoding="async">
+  </div>
+  <div class="splash-bar"><span></span></div>
+</div>
+<script>
+(function () {
+  var s = document.getElementById('splash'); if (!s) return;
+  if (document.documentElement.classList.contains('no-splash')) { s.parentNode.removeChild(s); return; }
+  try { sessionStorage.setItem('pemSplash', '1'); } catch (e) {}
+  var selesai = false, mulai = Date.now();
+  function tutup() {
+    if (selesai) return; selesai = true; s.classList.add('keluar');
+    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 1000);
+  }
+  function jadwal() { setTimeout(tutup, Math.max(0, 2700 - (Date.now() - mulai))); }
+  if (document.readyState === 'complete') jadwal(); else window.addEventListener('load', jadwal);
+  setTimeout(tutup, 4500);
+  s.addEventListener('click', tutup);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tutup(); });
+})();
+</script>
+
 
 <div id="main-page">
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-inner">
     <div>
-      <a href="mailto:gondanglegippem@gmail.com"><i class="fas fa-envelope"></i> gondanglegippem@gmail.com</a>
+      <a href="mailto:pemgondanglegi@gmail.com"><i class="fas fa-envelope"></i> pemgondanglegi@gmail.com</a>
       <a href="tel:081330449182"><i class="fas fa-phone"></i> 0813-3044-9182</a>
     </div>
     <div class="topbar-social">
@@ -1008,7 +1076,6 @@
           <a href="javascript:void(0)" onclick="openProfilTab('sejarah')">Sejarah Pesantren</a>
           <a href="javascript:void(0)" onclick="openProfilTab('visimisi')">Visi &amp; Misi</a>
           <a href="javascript:void(0)" onclick="openProfilTab('sarpras')">Fasilitas Pesantren</a>
-          <a href="javascript:void(0)" onclick="openProfilTab('program')">Muatan Kurikulum</a>
           <a href="javascript:void(0)" onclick="openProfilTab('guru')">Tenaga Pendidik</a>
         </div></div>
       </div>
@@ -1026,11 +1093,10 @@
         <div class="dropdown"><div class="dropdown-inner">
           <a href="javascript:void(0)" onclick="openPage('ekskul-list')">Ekstrakurikuler</a>
           <a href="javascript:void(0)" onclick="openPage('perpustakaan')">Perpustakaan</a>
-          <a href="javascript:void(0)" onclick="openPage('laboratorium')">Laboratorium</a>
           <a href="javascript:void(0)" onclick="openPage('kesiswaan')">Kesiswaan</a>
         </div></div>
       </div>
-      <a href="javascript:void(0)" onclick="openPage('psb')" class="nav-link nav-psb">PSB 2026</a>
+      <a href="javascript:void(0)" onclick="openPage('psb')" class="nav-link nav-psb">PSB 2027/2028</a>
       <a href="#prestasi" class="nav-link">Prestasi</a>
       <a href="javascript:void(0)" onclick="openPage('karya')" class="nav-link">Karya Santri</a>
       <a href="#alumni" class="nav-link">Alumni</a>
@@ -1142,9 +1208,8 @@
 
 <!-- HERO SLIDER -->
 <section class="hero" style="padding:0;">
-  <div class="slide active" id="slide-0">
-    <div class="slide-bg" style="background: linear-gradient(135deg, #0a1f44 0%, #1a4faf 50%, #2563eb 100%); width:100%; height:100%; position:absolute;"></div>
-    <div style="position:absolute;inset:0;background-image:radial-gradient(ellipse at 70% 50%, rgba(255,255,255,0.04) 0%, transparent 60%);"></div>
+  <div class="slide slide-foto active" id="slide-0" style="background:linear-gradient(135deg,#0a1f44,#1a4faf);">
+    <img class="slide-bg" src="img/hero-cordova-1280.jpg" srcset="img/hero-cordova-800.jpg 800w, img/hero-cordova-1280.jpg 1280w, img/hero-cordova-1600.jpg 1600w" sizes="100vw" alt="Gedung PEM Gondanglegi Malang" fetchpriority="high" decoding="async" style="object-position:center 6%;">
     <div class="slide-overlay"></div>
     <div class="slide-content">
       <span class="slide-tag">Selamat Datang</span>
@@ -1153,8 +1218,8 @@
       <a href="javascript:void(0)" onclick="openPage('profil')" class="btn-hero">Selengkapnya <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
-  <div class="slide" id="slide-1">
-    <div class="slide-bg" style="background: linear-gradient(135deg, #1a3a2a 0%, #1a6b3a 50%, #16a34a 100%); width:100%; height:100%; position:absolute;"></div>
+  <div class="slide slide-foto" id="slide-1" style="background:linear-gradient(135deg,#1a3a2a,#1a6b3a);">
+    <img class="slide-bg" src="img/hero-madina-1280.jpg" srcset="img/hero-madina-800.jpg 800w, img/hero-madina-1280.jpg 1280w, img/hero-madina-1920.jpg 1920w" sizes="100vw" alt="Madina Building, Pesantren Entrepreneur Muhammadiyah Gondanglegi" loading="lazy" decoding="async" style="object-position:center 80%;">
     <div class="slide-overlay"></div>
     <div class="slide-content">
       <span class="slide-tag">Kegiatan Terbaru</span>
@@ -1163,13 +1228,13 @@
       <a href="javascript:void(0)" onclick="openPage('semua-berita')" class="btn-hero">Lihat Berita <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
-  <div class="slide" id="slide-2">
-    <div class="slide-bg" style="background: linear-gradient(135deg, #3b1a6b 0%, #7c3aed 50%, #a78bfa 100%); width:100%; height:100%; position:absolute;"></div>
+  <div class="slide slide-foto" id="slide-2" style="background:linear-gradient(135deg,#3b1a6b,#7c3aed);">
+    <img class="slide-bg" src="img/hero-aula-1280.jpg" srcset="img/hero-aula-800.jpg 800w, img/hero-aula-1280.jpg 1280w, img/hero-aula-1920.jpg 1920w" sizes="100vw" alt="Aula Madina PEM Gondanglegi" loading="lazy" decoding="async" style="object-position:center 45%;">
     <div class="slide-overlay"></div>
     <div class="slide-content">
       <span class="slide-tag">Penerimaan Santri Baru</span>
-      <h1 class="slide-title">PSB Tahun Ajaran 2026/2027</h1>
-      <p class="slide-subtitle">Informasi lengkap pendaftaran, jadwal, dan persyaratan PSB PEM Gondanglegi Tahun Pelajaran 2026/2027.</p>
+      <h1 class="slide-title">PSB Tahun Ajaran 2027/2028</h1>
+      <p class="slide-subtitle">Informasi lengkap pendaftaran, jadwal, dan persyaratan PSB PEM Gondanglegi Tahun Pelajaran 2027/2028.</p>
       <a href="javascript:void(0)" onclick="openPage('psb')" class="btn-hero">Daftar Sekarang <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
@@ -1189,19 +1254,19 @@
 <div class="stats-bar">
   <div class="stats-inner">
     <div class="stat-item">
-      <div class="stat-num">2018</div>
+      <div class="stat-num">2005</div>
       <div class="stat-label">Tahun Berdiri</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">250+</div>
+      <div class="stat-num">300+</div>
       <div class="stat-label">Santri Aktif</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">20</div>
+      <div class="stat-num" id="stat-guru">21</div>
       <div class="stat-label">Tenaga Pendidik</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">180+</div>
+      <div class="stat-num">30</div>
       <div class="stat-label">Prestasi Diraih</div>
     </div>
   </div>
@@ -1228,14 +1293,16 @@
           <a href="javascript:void(0)" onclick="openProfilTab('sambutan')">Selengkapnya</a>
         </div>
         <div class="sambutan-content">
+<div data-mudir="ringkas">
           <p><em>Bismillahirrahmanirrahim, Assalamu'alaikum Wr. Wb.</em></p>
-          <p>Puji syukur kami panjatkan ke hadirat Allah SWT atas segala limpahan rahmat dan nikmat-Nya. PEM Gondanglegi Malang telah melewati perjalanan panjang sejak 2018 dalam mengabdi kepada bangsa dan negara melalui bidang pendidikan.</p>
+          <p>Puji syukur kami panjatkan ke hadirat Allah SWT atas segala limpahan rahmat dan nikmat-Nya. PEM Gondanglegi Malang telah melewati perjalanan panjang sejak 2005 dalam mengabdi kepada bangsa dan negara melalui bidang pendidikan.</p>
           <p>Sebagai Pesantren Entrepreneur yang berdedikasi, kami berkomitmen memberikan pendidikan dan pelatihan Entrepreneur berkualitas, membentuk karakter santri yang profesional, berintegritas, serta siap menghadapi persaingan di dunia usaha dan industri.</p>
+</div>
           <div class="sambutan-sign">
-            <img src="img/kepala-pesantren.jpg" alt="K.H. Muh. Fahri, S.Ag., M.M." style="width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:top;flex-shrink:0;">
+            <img data-mudir="foto" loading="lazy" decoding="async" src="img/kepala-pesantren.jpg" alt="K.H. Muh. Fahri, S.Ag., M.M." style="width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:top;flex-shrink:0;">
             <div>
-              <strong>K.H. Muh. Fahri, S.Ag., M.M.</strong>
-              <span>Mudir Pesantren Entrepreneur Muhammadiyah (PEM) Malang</span>
+              <strong data-mudir="nama">K.H. Muh. Fahri, S.Ag., M.M.</strong>
+              <span data-mudir="jabatan">Mudir Pesantren Entrepreneur Muhammadiyah (PEM) Gondanglegi</span>
             </div>
           </div>
         </div>
@@ -1402,7 +1469,7 @@
           <div class="kontak-icon"><i class="fas fa-map-marker-alt"></i></div>
           <div class="kontak-detail">
             <strong>Alamat</strong>
-            <span>Jl. MT. Hariyono No.1 Gondanglegi, Kab. Malang, Jawa Timur 65174</span>
+            <span>Jl. MT. Haryono No.1 Gondanglegi, Kab. Malang, Jawa Timur 65174</span>
           </div>
         </div>
         <div class="kontak-item">
@@ -1416,7 +1483,7 @@
           <div class="kontak-icon"><i class="fas fa-envelope"></i></div>
           <div class="kontak-detail">
             <strong>Email</strong>
-            <span>gondanglegippem@gmail.com</span>
+            <span>pemgondanglegi@gmail.com</span>
           </div>
         </div>
         <div class="kontak-item">
@@ -1467,7 +1534,7 @@
           <span>Santri · Entrepreneur · Mendunia</span>
         </div>
       </div>
-      <p class="footer-desc">PEM Gondanglegi Malang telah menjadi bagian tak terpisahkan dari perjalanan Malang sebagai kota pendidikan sejak tahun 2018. Mencetak generasi unggul, berakhlak mulia, dan berdaya saing global.</p>
+      <p class="footer-desc">PEM Gondanglegi Malang telah menjadi bagian tak terpisahkan dari perjalanan Malang sebagai kota pendidikan sejak tahun 2005. Mencetak generasi unggul, berakhlak mulia, dan berdaya saing global.</p>
       <div class="footer-social">
         <a href="https://www.facebook.com/share/1Ey2zfW3HJ/" target="_blank" rel="noopener" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
         <a href="https://www.instagram.com/pem_gondanglegi/" target="_blank" rel="noopener" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
@@ -1481,7 +1548,6 @@
         <li><a href="javascript:void(0)" onclick="openProfilTab('sambutan')">Sambutan Mudir Pesantren</a></li>
         <li><a href="javascript:void(0)" onclick="openProfilTab('sejarah')">Sejarah Pesantren</a></li>
         <li><a href="javascript:void(0)" onclick="openProfilTab('visimisi')">Visi &amp; Misi</a></li>
-        <li><a href="#">Muatan Kurikulum</a></li>
         <li><a href="#">Sarana Prasarana</a></li>
         <li><a href="javascript:void(0)" onclick="openPage('kesiswaan')">Kesiswaan</a></li>
       </ul>
@@ -1499,9 +1565,9 @@
     <div class="footer-col">
       <h4>Kontak</h4>
       <ul class="footer-info-list">
-        <li><i class="fas fa-map-marker-alt"></i> Jl. MT. Hariyono No.1, Gondanglegi, Kab. Malang, Jawa Timur 65174</li>
+        <li><i class="fas fa-map-marker-alt"></i> Jl. MT. Haryono No.1, Gondanglegi, Kab. Malang, Jawa Timur 65174</li>
         <li><i class="fas fa-phone"></i> 0813-3044-9182</li>
-        <li><i class="fas fa-envelope"></i> gondanglegippem@gmail.com</li>
+        <li><i class="fas fa-envelope"></i> pemgondanglegi@gmail.com</li>
         <li><i class="fas fa-clock"></i> Senin – Sabtu: 08.00 – 16.00 WIB</li>
       </ul>
     </div>
@@ -1780,7 +1846,7 @@
       <span class="detail-tag">Profil Pesantren</span>
       <h1 class="detail-title">PEM Gondanglegi Malang</h1>
       <div class="detail-meta-bar">
-        <div class="detail-meta-item"><i class="fas fa-calendar"></i> Berdiri Sejak 2018</div>
+        <div class="detail-meta-item"><i class="fas fa-calendar"></i> Berdiri Sejak 2005</div>
         <div class="detail-meta-item"><i class="fas fa-map-marker-alt"></i> Gondanglegi, Kab. Malang</div>
       </div>
     </div>
@@ -1790,7 +1856,6 @@
       <button class="profil-tab active" onclick="switchProfilTab(this,'sambutan')">Sambutan Mudir</button>
       <button class="profil-tab" onclick="switchProfilTab(this,'sejarah')">Sejarah Pesantren</button>
       <button class="profil-tab" onclick="switchProfilTab(this,'visimisi')">Visi &amp; Misi</button>
-      <button class="profil-tab" onclick="switchProfilTab(this,'program')">Program Keahlian</button>
       <button class="profil-tab" onclick="switchProfilTab(this,'sarpras')">Sarana Prasarana</button>
       <button class="profil-tab" onclick="switchProfilTab(this,'kegiatan')">Kegiatan Pesantren</button>
       <button class="profil-tab" onclick="switchProfilTab(this,'guru')">Tenaga Pendidik</button>
@@ -1800,26 +1865,27 @@
     <div id="profil-sambutan" class="profil-section active">
       <div class="sp-card">
         <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px;">
-          <img src="img/kepala-pesantren.jpg" alt="K.H. Muh. Fahri, S.Ag., M.M." style="width:130px;height:160px;object-fit:cover;object-position:top center;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.15);flex-shrink:0;">
+          <img data-mudir="foto" loading="lazy" decoding="async" src="img/kepala-pesantren.jpg" alt="K.H. Muh. Fahri, S.Ag., M.M." style="width:130px;height:160px;object-fit:cover;object-position:top center;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.15);flex-shrink:0;">
           <div>
-            <h2 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px;">K.H. Muh. Fahri, S.Ag., M.M.</h2>
-            <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;">Mudir Pesantren Entrepreneur Muhammadiyah (PEM) Gondanglegi</div>
+            <h2 data-mudir="nama" style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:6px;">K.H. Muh. Fahri, S.Ag., M.M.</h2>
+            <div data-mudir="jabatan" style="font-size:13px;color:var(--gray-500);margin-bottom:12px;">Mudir Pesantren Entrepreneur Muhammadiyah (PEM) Gondanglegi</div>
           </div>
         </div>
+        <div data-mudir="isi">
         <p><em>Bismillahirrahmanirrahim, Assalamu'alaikum Wr. Wb.</em></p>
-        <p>Puji syukur kami panjatkan ke hadirat Allah SWT atas segala limpahan rahmat dan nikmat-Nya. PEM Gondanglegi Malang telah melewati perjalanan panjang sejak 2018 dalam mengabdi kepada bangsa dan negara melalui bidang pendidikan.</p>
+        <p>Puji syukur kami panjatkan ke hadirat Allah SWT atas segala limpahan rahmat dan nikmat-Nya. PEM Gondanglegi Malang telah melewati perjalanan panjang sejak 2005 dalam mengabdi kepada bangsa dan negara melalui bidang pendidikan.</p>
         <p>Sebagai Pesantren Entrepreneur yang berdedikasi, kami berkomitmen memberikan pendidikan dan pelatihan Entrepreneur berkualitas, membentuk karakter santri yang profesional, berintegritas, serta siap menghadapi persaingan di dunia usaha dan industri.</p>
-        <p>Alhamdulillah, segala puji bagi Allah SWT yang telah memberikan nikmat dan karunia-Nya sehingga Pondok Pesantren dan SMK PEM Gondanglegi Malang terus berkembang, berinovasi, dan senantiasa memberikan manfaat nyata bagi umat dan bangsa.</p>
+        <p>Alhamdulillah, segala puji bagi Allah SWT yang telah memberikan nikmat dan karunia-Nya sehingga Pondok Pesantren PEM Gondanglegi Malang terus berkembang, berinovasi, dan senantiasa memberikan manfaat nyata bagi umat dan bangsa.</p>
         <p>PEM Gondanglegi Malang merupakan lembaga pendidikan kejuruan berbasis pesantren yang hadir dengan visi memadukan keunggulan pendidikan vokasional dengan pembentukan karakter Islami yang kokoh. Kami tidak sekadar mencetak lulusan yang kompeten di bidang teknis, tetapi juga generasi yang berakhlak mulia, jujur, disiplin, dan siap berkontribusi nyata di tengah masyarakat.</p>
-        <p>Selama lebih dari tujuh tahun perjalanan kami, banyak hal yang telah kami capai bersama — ratusan alumni yang kini sukses di berbagai sektor kehidupan, kemitraan dengan dunia industri yang terus bertumbuh, serta lingkungan pesantren yang semakin kondusif untuk menempa diri. Semua ini adalah buah dari kerja keras seluruh civitas pesantren, dukungan orang tua santri, serta ridha Allah SWT.</p>
+        <p>Selama lebih dari dua puluh tahun perjalanan kami, banyak hal yang telah kami capai bersama — ratusan alumni yang kini sukses di berbagai sektor kehidupan, kemitraan dengan dunia industri yang terus bertumbuh, serta lingkungan pesantren yang semakin kondusif untuk menempa diri. Semua ini adalah buah dari kerja keras seluruh civitas pesantren, dukungan orang tua santri, serta ridha Allah SWT.</p>
         <p>Kami mengajak seluruh elemen masyarakat untuk bersama-sama membangun generasi penerus bangsa yang tidak hanya cerdas secara intelektual, tetapi juga kuat secara spiritual. Di sinilah, di PEM Gondanglegi, kami percaya bahwa ilmu dan iman berjalan beriringan.</p>
         <p>Mari bersama kami mewujudkan generasi muda yang cerdas, terampil, berkarakter, dan siap menghadapi tantangan zaman dengan pondasi iman yang teguh.</p>
         <p><em>Wassalamu'alaikum Warahmatullahi Wabarakatuh.</em></p>
+        </div>
         <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-100);display:flex;align-items:center;gap:14px;">
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Sejarah -->
     <div id="profil-sejarah" class="profil-section">
@@ -1829,11 +1895,9 @@
         <p>Dengan beberapa program tersebut harapannya lulusan Pesantren Entrepreneur  Muhammadiyah Gondanglegi mampu menjadi santri yang millenial mendunia.  Dengan didukung lingkungan yang asri, Pesantren Entrepreneur Muhammadiyah  Gondanglegi berupaya mencetak insan yang muttafaqoh fī al-dīn untuk menjadi kader  pemimpin umat dan bangsa, serta selalu mengupayakan terciptanya pendidikan santri yang  memiliki jiwa keikhlasan, kesederhanaan, kemandirian, ukhuwah islamiyah, kebebasan berfikir dan berprilaku atas dasar al-Qur’an dan al-Sunnah untuk meningkatkan taqwa kepada Allah SWT.</p>
         <p> Para santri juga dididik untuk bisa berfikir terbuka dan moderat tanpa menghilangkan unsur peran Islam. Disiplin dan kesederhanaan, diaplikasikan dalam kehidupan sehari-hari di lingkungan pondok. Di Pesantren Entrepreneur Muhammadiyah Gondanglegi, pengelolaan pendidikan dan pengajaran serta kegiatan sehari-hari dilaksanakan oleh para ustad dan ustadzah dengan latar belakang pendidikan dari berbagai perguruan tinggi dan pesantren modern yang sebagian besar tinggal di asrama secara penuh sehingga mampu mengawasi serta membimbing santri dalam kegiatan belajar mengajar dan kepengasuhan.</p>
         <table class="detail-info-table" style="margin-top:20px;">
-          <tr><td>Tahun Berdiri Pesantren</td><td>2018</td></tr>
-          <tr><td>Tahun Berdiri SMK</td><td>1986</td></tr>
-          <tr><td>Pendiri</td><td>K.H. Abdurrahman</td></tr>
-          <tr><td>Mudir Saat Ini</td><td>K.H. Muh Fahri, S.Ag., .M.M.</td></tr>
-          <tr><td>Kepala SMK</td><td>Munali ST.</td></tr>
+          <tr><td>Tahun Berdiri Pesantren</td><td>2005</td></tr>
+          <tr><td>Pendiri</td><td>Pimpinan Wilayah Muhammadiyah (PWM) Jawa Timur</td></tr>
+          <tr><td>Mudir Saat Ini</td><td data-mudir="nama">K.H. Muh. Fahri, S.Ag., M.M.</td></tr>
           <tr><td>Status Akreditasi</td><td>A (Unggul)</td></tr>
         </table>
       </div>
@@ -1855,32 +1919,16 @@
       </div>
     </div>
 
-    <!-- Program Keahlian -->
-    <div id="profil-program" class="profil-section">
-      <div class="sp-card">
-        <h2><i class="fas fa-graduation-cap"></i> Program Keahlian</h2>
-        <p>PEM Gondanglegi saat ini membuka 4 program keahlian yang terakreditasi A oleh BAN-S/M.</p>
-        <div class="program-grid">
-          <div class="program-card"><div class="p-icon">💻</div><h4>Teknik Komputer &amp; Jaringan (TKJ)</h4><p>Membekali siswa dengan keahlian instalasi jaringan komputer, konfigurasi server, dan keamanan jaringan.</p></div>
-          <div class="program-card"><div class="p-icon">📊</div><h4>Akuntansi &amp; Keuangan Lembaga (AKL)</h4><p>Menyiapkan tenaga akuntansi profesional yang mampu menyusun laporan keuangan dan bekerja di perbankan atau kantor akuntan.</p></div>
-          <div class="program-card"><div class="p-icon">🎨</div><h4>Multimedia (MM)</h4><p>Mengembangkan kreativitas siswa dalam produksi konten digital, desain grafis, fotografi, dan videografi profesional.</p></div>
-          <div class="program-card"><div class="p-icon">🏢</div><h4>Otomatisasi &amp; Tata Kelola Perkantoran (OTKP)</h4><p>Melatih siswa dalam manajemen perkantoran modern, korespondensi bisnis, dan administrasi berbasis digital.</p></div>
-        </div>
-      </div>
-    </div>
-
     <!-- Sarana Prasarana -->
     <div id="profil-sarpras" class="profil-section">
       <div class="sp-card">
         <h2><i class="fas fa-building"></i> Sarana Prasarana</h2>
-        <p>PEM Gondanglegi memiliki fasilitas lengkap yang mendukung proses pembelajaran dan pengembangan diri siswa.</p>
+        <p>PEM Gondanglegi memiliki fasilitas lengkap yang mendukung proses pembelajaran dan pengembangan diri santri.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;">
-          <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🖥️</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Lab Komputer</div><div style="font-size:12.5px;color:var(--gray-500);">3 laboratorium dengan total 120 unit PC terbaru dan koneksi internet fiber optik</div></div></div>
-          <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">📚</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Perpustakaan</div><div style="font-size:12.5px;color:var(--gray-500);">Koleksi 8.000+ buku, e-library, dan ruang baca yang nyaman</div></div></div>
+          <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">📚</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Perpustakaan</div><div style="font-size:12.5px;color:var(--gray-500);">Koleksi 1.000+ buku, e-library, dan ruang baca yang nyaman</div></div></div>
           <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🕌</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Masjid Pesantren</div><div style="font-size:12.5px;color:var(--gray-500);">Masjid berkapasitas 1.000 jamaah sebagai pusat kegiatan spiritual</div></div></div>
           <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">⚽</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Lapangan Olahraga</div><div style="font-size:12.5px;color:var(--gray-500);">Lapangan futsal, basket, voli, dan area beladiri</div></div></div>
-          <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🏠</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Asrama Santri</div><div style="font-size:12.5px;color:var(--gray-500);">Asrama putra dan putri berkapasitas 400 santri</div></div></div>
-          <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🔬</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Lab Praktik</div><div style="font-size:12.5px;color:var(--gray-500);">Lab akuntansi, lab multimedia, dan bengkel OTKP modern</div></div></div>
+          <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🏠</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Asrama Santri</div><div style="font-size:12.5px;color:var(--gray-500);">Asrama putra dan putri berkapasitas 300 santri</div></div></div>
           <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🏥</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">UKS</div><div style="font-size:12.5px;color:var(--gray-500);">Unit Kesehatan Sekolah dengan tenaga medis profesional</div></div></div>
           <div style="display:flex;gap:12px;padding:16px;border:1.5px solid var(--gray-100);border-radius:12px;align-items:flex-start;"><div style="font-size:28px;flex-shrink:0;">🍽️</div><div><div style="font-weight:700;color:var(--navy);font-size:13.5px;margin-bottom:3px;">Kantin Sehat</div><div style="font-size:12.5px;color:var(--gray-500);">Kantin bersih dengan menu bergizi dan harga terjangkau</div></div></div>
         </div>
@@ -1891,14 +1939,14 @@
     <div id="profil-kegiatan" class="profil-section">
       <div class="sp-card">
         <h2><i class="fas fa-mosque"></i> Kegiatan Pesantren</h2>
-        <p>PEM Gondanglegi mengintegrasikan kegiatan pesantren dalam keseharian siswa sebagai pembentuk karakter dan spiritualitas.</p>
+        <p>PEM Gondanglegi mengintegrasikan kegiatan pesantren dalam keseharian santri sebagai pembentuk karakter dan spiritualitas.</p>
         <div class="kegiatan-grid">
-          <div class="kegiatan-item"><img src="https://picsum.photos/seed/subuh/400/300" alt="Sholat Subuh Berjamaah"><div>Sholat Subuh Berjamaah</div></div>
-          <div class="kegiatan-item"><img src="https://picsum.photos/seed/quran/400/300" alt="Tahfidz & Tilawah Al-Quran"><div>Tahfidz &amp; Tilawah Al-Quran</div></div>
-          <div class="kegiatan-item"><img src="https://picsum.photos/seed/kajian/400/300" alt="Kajian Kitab Kuning"><div>Kajian Kitab Kuning</div></div>
-          <div class="kegiatan-item"><img src="https://picsum.photos/seed/hadroh/400/300" alt="Hadroh & Shalawat"><div>Hadroh &amp; Shalawat</div></div>
-          <div class="kegiatan-item"><img src="https://picsum.photos/seed/baksos/400/300" alt="Bakti Sosial Masyarakat"><div>Bakti Sosial Masyarakat</div></div>
-          <div class="kegiatan-item"><img src="https://picsum.photos/seed/ramadan/400/300" alt="Pesantren Kilat Ramadan"><div>Pesantren Kilat Ramadan</div></div>
+          <div class="kegiatan-item"><img loading="lazy" decoding="async" src="https://picsum.photos/seed/subuh/400/300" alt="Sholat Subuh Berjamaah"><div>Sholat Subuh Berjamaah</div></div>
+          <div class="kegiatan-item"><img loading="lazy" decoding="async" src="https://picsum.photos/seed/quran/400/300" alt="Tahfidz & Tilawah Al-Quran"><div>Tahfidz &amp; Tilawah Al-Quran</div></div>
+          <div class="kegiatan-item"><img loading="lazy" decoding="async" src="https://picsum.photos/seed/kajian/400/300" alt="Kajian Kitab Kuning"><div>Kajian Kitab Kuning</div></div>
+          <div class="kegiatan-item"><img loading="lazy" decoding="async" src="https://picsum.photos/seed/hadroh/400/300" alt="Hadroh & Shalawat"><div>Hadroh &amp; Shalawat</div></div>
+          <div class="kegiatan-item"><img loading="lazy" decoding="async" src="https://picsum.photos/seed/baksos/400/300" alt="Bakti Sosial Masyarakat"><div>Bakti Sosial Masyarakat</div></div>
+          <div class="kegiatan-item"><img loading="lazy" decoding="async" src="https://picsum.photos/seed/ramadan/400/300" alt="Pesantren Kilat Ramadan"><div>Pesantren Kilat Ramadan</div></div>
         </div>
       </div>
     </div>
@@ -1913,29 +1961,8 @@
           <button class="tenaga-subtab" onclick="switchTenagaTab(this,'kependidikan')">Tenaga Kependidikan</button>
         </div>
         <div class="tenaga-grid" id="tenaga-pendidik-grid">
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Nugroho+Yusuf+SHI&background=1a4faf&color=fff&size=200&bold=true" alt="Nugroho Yusuf, S.H.I."><div class="tenaga-name">Nugroho Yusuf, S.H.I.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Sugiono+SSy&background=16a34a&color=fff&size=200&bold=true" alt="Sugiono, S.Sy."><div class="tenaga-name">Sugiono, S.Sy.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Ahmad+Rosyidi+SPdI&background=dc2626&color=fff&size=200&bold=true" alt="Ahmad Rosyidi, S.Pd.I."><div class="tenaga-name">Ahmad Rosyidi, S.Pd.I.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Syamsul+Bahri+MPd&background=7c3aed&color=fff&size=200&bold=true" alt="Syamsul Bahri, M.Pd."><div class="tenaga-name">Syamsul Bahri, M.Pd.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Ahmad+Muhajir+SH&background=0284c7&color=fff&size=200&bold=true" alt="Ahmad Muhajir, S.H."><div class="tenaga-name">Ahmad Muhajir, S.H.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Apriliyani+N+N+SAg&background=d97706&color=fff&size=200&bold=true" alt="Apriliyani N N, S.Ag."><div class="tenaga-name">Apriliyani N N, S.Ag.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Selma+Rizky+A+SH&background=0f766e&color=fff&size=200&bold=true" alt="Selma Rizky A, S.H."><div class="tenaga-name">Selma Rizky A, S.H.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Rochma+Aulia+MH&background=be185d&color=fff&size=200&bold=true" alt="Rochma Aulia, M.H."><div class="tenaga-name">Rochma Aulia, M.H.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Rasti+Astuti+L+SPd&background=4338ca&color=fff&size=200&bold=true" alt="Rasti Astuti L, S.Pd."><div class="tenaga-name">Rasti Astuti L, S.Pd.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Javier+Achmad+O+SPd&background=047857&color=fff&size=200&bold=true" alt="Javier Achmad O, S.Pd."><div class="tenaga-name">Javier Achmad O, S.Pd.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Muhammad+Yusuf+M&background=1a4faf&color=fff&size=200&bold=true" alt="Muhammad Yusuf M."><div class="tenaga-name">Muhammad Yusuf M.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Shabrinuha+BM&background=16a34a&color=fff&size=200&bold=true" alt="Shabrinuha B.M."><div class="tenaga-name">Shabrinuha B.M.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Dimas+Roby&background=dc2626&color=fff&size=200&bold=true" alt="Dimas Roby"><div class="tenaga-name">Dimas Roby</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Fika+Dita&background=7c3aed&color=fff&size=200&bold=true" alt="Fika Dita"><div class="tenaga-name">Fika Dita</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Arjuna+M&background=0284c7&color=fff&size=200&bold=true" alt="Arjuna M."><div class="tenaga-name">Arjuna M.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Putri+Nia+A&background=d97706&color=fff&size=200&bold=true" alt="Putri Nia A."><div class="tenaga-name">Putri Nia A.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Nia+Mualimah&background=0f766e&color=fff&size=200&bold=true" alt="Nia Mualimah"><div class="tenaga-name">Nia Mualimah</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
         </div>
         <div class="tenaga-grid" id="tenaga-kependidikan-grid" style="display:none;">
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Ika+Mardina+SE&background=1a4faf&color=fff&size=200&bold=true" alt="Ika Mardina, S.E."><div class="tenaga-name">Ika Mardina, S.E.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Eka+Merliyanti+SSos&background=16a34a&color=fff&size=200&bold=true" alt="Eka Merliyanti, S.Sos."><div class="tenaga-name">Eka Merliyanti, S.Sos.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Wiwik+Andriani+SM&background=dc2626&color=fff&size=200&bold=true" alt="Wiwik Andriani, SM."><div class="tenaga-name">Wiwik Andriani, SM.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
-          <div class="tenaga-card"><img class="tenaga-photo" src="https://ui-avatars.com/api/?name=Siti+Mariyam+SKom&background=7c3aed&color=fff&size=200&bold=true" alt="Siti Mariyam, S.Kom."><div class="tenaga-name">Siti Mariyam, S.Kom.</div><div class="tenaga-jabatan">[Lengkapi jabatan]</div><div class="tenaga-quote">"[Lengkapi kutipan/motto]"</div></div>
         </div>
       </div>
     </div>
@@ -1958,7 +1985,7 @@
       <span class="detail-tag">Penerimaan Santri Baru</span>
       <h1 class="detail-title">Formulir Pendaftaran Online</h1>
       <div class="detail-meta-bar">
-        <div class="detail-meta-item"><i class="fas fa-calendar"></i> Tahun Ajaran 2026/2027</div>
+        <div class="detail-meta-item"><i class="fas fa-calendar"></i> Tahun Ajaran 2027/2028</div>
         <div class="detail-meta-item"><i class="fas fa-school"></i> PEM Gondanglegi Malang</div>
       </div>
     </div>
@@ -1977,13 +2004,13 @@
     <div class="psb-info" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:20px;margin-bottom:24px;">
       <div class="sp-card" style="padding:22px 24px;">
         <h3 style="font-size:17px;color:var(--navy);margin:0 0 10px;"><i class="fas fa-wallet" style="color:var(--gold);"></i> Rincian Biaya</h3>
-        <table class="tbl">
+        <table class="tbl" id="psb-biaya-tbl">
           <tr><td>Uang Pendaftaran</td><td>Rp250.000</td></tr>
           <tr><td>DPP</td><td>Rp10.000.000</td></tr>
           <tr><td>Biaya syahriyah per bulan<br><span style="font-size:12.5px;color:var(--gray-500);font-weight:400;">makan 3 x sehari, asrama, dan pendidikan</span></td><td>Rp1.000.000</td></tr>
           <tr class="total"><td>Total</td><td>Rp11.250.000</td></tr>
         </table>
-        <p style="font-size:12.5px;color:var(--gray-500);margin:10px 0 0;line-height:1.6;">Total = Rp250.000 + Rp10.000.000 + Rp1.000.000.</p>
+        <p id="psb-biaya-catatan" style="font-size:12.5px;color:var(--gray-500);margin:10px 0 0;line-height:1.6;">Total = Rp250.000 + Rp10.000.000 + Rp1.000.000.</p>
       </div>
       <div class="sp-card" style="padding:22px 24px;">
         <h3 style="font-size:17px;color:var(--navy);margin:0 0 4px;"><i class="fas fa-folder-open" style="color:var(--gold);"></i> Persyaratan Berkas</h3>
@@ -2086,7 +2113,7 @@
     <div class="pv-head"><h3 id="pv-judul">Kebijakan Privasi</h3><button type="button" onclick="tutupPrivasi()" aria-label="Tutup">&times;</button></div>
     <div class="pv-body">
       <p style="font-size:12.5px;color:#6b7280;margin-top:14px;">Terakhir diperbarui: Oktober 2026</p>
-      <p>Kebijakan ini menjelaskan bagaimana PEM Gondanglegi Malang (Pesantren Entrepreneur Muhammadiyah, Jl. MT. Hariyono No.1, Gondanglegi, Kab. Malang) mengumpulkan, menggunakan, dan melindungi data yang Anda berikan melalui situs ini.</p>
+      <p>Kebijakan ini menjelaskan bagaimana PEM Gondanglegi Malang (Pesantren Entrepreneur Muhammadiyah, Jl. MT. Haryono No.1, Gondanglegi, Kab. Malang) mengumpulkan, menggunakan, dan melindungi data yang Anda berikan melalui situs ini.</p>
 
       <h4>1. Data yang kami kumpulkan</h4>
       <ul>
@@ -2123,7 +2150,7 @@
       <p>Data disimpan pada layanan basis data berbasis cloud dengan pembatasan akses. Data disimpan selama diperlukan untuk proses penerimaan dan, bagi santri yang diterima, selama yang bersangkutan menjadi santri. Pendaftar yang tidak diterima atau membatalkan pendaftaran dapat meminta penghapusan datanya.</p>
 
       <h4>6. Hak Anda</h4>
-      <p>Anda dapat meminta untuk melihat, memperbaiki, atau menghapus data, serta menarik persetujuan (penarikan persetujuan dapat memengaruhi kelanjutan proses pendaftaran). Hubungi kami di telepon 0813-3044-9182 atau email gondanglegippem@gmail.com.</p>
+      <p>Anda dapat meminta untuk melihat, memperbaiki, atau menghapus data, serta menarik persetujuan (penarikan persetujuan dapat memengaruhi kelanjutan proses pendaftaran). Hubungi kami di telepon 0813-3044-9182 atau email pemgondanglegi@gmail.com.</p>
 
       <h4>7. Perubahan kebijakan</h4>
       <p>Kebijakan ini dapat diperbarui sewaktu-waktu. Versi terbaru selalu ditampilkan di situs ini.</p>
@@ -2263,23 +2290,27 @@ const DATA = {
   berita: [],
   alumni: [],
   pengumuman: [],
+  agenda: [],
+  guru: [],
+  biaya: [],
+  sambutan: null,
   ekskul: [
-    { id:1, nama:'Hisbul Wathan', icon:'🏕️', deskripsi:'Hisbul Wathan (HW) adalah gerakan kepanduan Muhammadiyah yang membentuk karakter siswa yang tangguh, mandiri, disiplin, dan cinta alam. Kegiatan meliputi kemah, survival training, dan bakti sosial.',
+    { id:1, nama:'Hisbul Wathan', icon:'🏕️', deskripsi:'Hisbul Wathan (HW) adalah gerakan kepanduan Muhammadiyah yang membentuk karakter santri yang tangguh, mandiri, disiplin, dan cinta alam. Kegiatan meliputi kemah, survival training, dan bakti sosial.',
       foto:['https://picsum.photos/seed/hw1/400/300','https://picsum.photos/seed/hw2/400/300','https://picsum.photos/seed/hw3/400/300','https://picsum.photos/seed/hw4/400/300'],
       ket:['Kemah Tahunan HW','Latihan sandi dan peta kompas','Bakti sosial di desa sekitar','Upacara pelantikan anggota HW']},
-    { id:2, nama:'Futsal', icon:'⚽', deskripsi:'Ekstrakurikuler Futsal melatih ketangkasan, kerja sama tim, dan sportivitas siswa. Tim futsal PEM Gondanglegi aktif mengikuti pertandingan persahabatan dan turnamen antar sekolah.',
+    { id:2, nama:'Futsal', icon:'⚽', deskripsi:'Ekstrakurikuler Futsal melatih ketangkasan, kerja sama tim, dan sportivitas santri. Tim futsal PEM Gondanglegi aktif mengikuti pertandingan persahabatan dan turnamen antar sekolah.',
       foto:['https://picsum.photos/seed/futsal1/400/300','https://picsum.photos/seed/futsal2/400/300','https://picsum.photos/seed/futsal3/400/300','https://picsum.photos/seed/futsal4/400/300'],
       ket:['Latihan rutin futsal','Pertandingan persahabatan antar sekolah','Seleksi tim inti sekolah','Turnamen futsal pelajar']},
-    { id:3, nama:'Beladiri Tapak Suci', icon:'🥋', deskripsi:'Tapak Suci adalah seni beladiri pencak silat khas Muhammadiyah yang melatih fisik, mental, dan spiritual siswa. Anggota aktif berlatih rutin dan mengikuti kejuaraan pencak silat.',
+    { id:3, nama:'Beladiri Tapak Suci', icon:'🥋', deskripsi:'Tapak Suci adalah seni beladiri pencak silat khas Muhammadiyah yang melatih fisik, mental, dan spiritual santri. Anggota aktif berlatih rutin dan mengikuti kejuaraan pencak silat.',
       foto:['https://picsum.photos/seed/tapaksuci1/400/300','https://picsum.photos/seed/tapaksuci2/400/300','https://picsum.photos/seed/tapaksuci3/400/300','https://picsum.photos/seed/tapaksuci4/400/300'],
       ket:['Latihan jurus dan teknik dasar','Ujian kenaikan tingkat sabuk','Kejuaraan pencak silat pelajar','Pelatihan fisik dan mental']},
-    { id:4, nama:'Basket', icon:'🏀', deskripsi:'Ekstrakurikuler Basket membina siswa dalam teknik dasar, strategi, dan kerja sama tim bola basket. Tim basket sekolah aktif berlatih dan bertanding di berbagai kompetisi pelajar.',
+    { id:4, nama:'Basket', icon:'🏀', deskripsi:'Ekstrakurikuler Basket membina santri dalam teknik dasar, strategi, dan kerja sama tim bola basket. Tim basket sekolah aktif berlatih dan bertanding di berbagai kompetisi pelajar.',
       foto:['https://picsum.photos/seed/basket1/400/300','https://picsum.photos/seed/basket2/400/300','https://picsum.photos/seed/basket3/400/300','https://picsum.photos/seed/basket4/400/300'],
       ket:['Latihan teknik dasar basket','Pertandingan persahabatan antar sekolah','Seleksi tim basket sekolah','Kompetisi basket pelajar']},
-    { id:5, nama:'Voli', icon:'🏐', deskripsi:'Ekstrakurikuler Voli melatih siswa dalam teknik passing, smash, dan strategi permainan bola voli. Tim voli sekolah rutin berlatih dan berpartisipasi dalam turnamen antar sekolah.',
+    { id:5, nama:'Voli', icon:'🏐', deskripsi:'Ekstrakurikuler Voli melatih santri dalam teknik passing, smash, dan strategi permainan bola voli. Tim voli sekolah rutin berlatih dan berpartisipasi dalam turnamen antar sekolah.',
       foto:['https://picsum.photos/seed/voli1/400/300','https://picsum.photos/seed/voli2/400/300','https://picsum.photos/seed/voli3/400/300','https://picsum.photos/seed/voli4/400/300'],
       ket:['Latihan teknik dasar voli','Pertandingan persahabatan antar sekolah','Seleksi tim voli sekolah','Turnamen voli pelajar']},
-    { id:6, nama:'Badminton', icon:'🏸', deskripsi:'Ekstrakurikuler Badminton mengasah kelincahan, kecepatan, dan strategi siswa dalam olahraga bulu tangkis. Anggota aktif berlatih dan mewakili sekolah di kejuaraan badminton pelajar.',
+    { id:6, nama:'Badminton', icon:'🏸', deskripsi:'Ekstrakurikuler Badminton mengasah kelincahan, kecepatan, dan strategi santri dalam olahraga bulu tangkis. Anggota aktif berlatih dan mewakili sekolah di kejuaraan badminton pelajar.',
       foto:['https://picsum.photos/seed/badminton1/400/300','https://picsum.photos/seed/badminton2/400/300','https://picsum.photos/seed/badminton3/400/300','https://picsum.photos/seed/badminton4/400/300'],
       ket:['Latihan teknik dasar badminton','Pertandingan persahabatan antar sekolah','Seleksi tim badminton sekolah','Kejuaraan badminton pelajar']},
   ],
@@ -2319,7 +2350,6 @@ function openPage(name) {
   else if (name === 'agenda') { showPage('page-agenda'); }
   else if (name === 'galeri') { renderGaleri(); showPage('page-galeri'); }
   else if (name === 'perpustakaan') { showPage('page-perpustakaan'); }
-  else if (name === 'laboratorium') { showPage('page-laboratorium'); }
   else if (name === 'kesiswaan') { showPage('page-kesiswaan'); }
 }
 
@@ -2350,11 +2380,11 @@ function renderEkskulList() {
   if (!el) return;
   el.innerHTML = DATA.ekskul.map(e => `
     <div onclick="openDetail('ekskul',${e.id})" style="background:white;border-radius:18px;box-shadow:0 4px 20px rgba(0,0,0,.07);overflow:hidden;cursor:pointer;transition:all .2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.12)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0,0,0,.07)'">
-      <img alt="" src="${e.foto[0]}" style="width:100%;height:180px;object-fit:cover;display:block;">
+      ${(e.foto[0] || e.cover) ? '<img loading="lazy" decoding="async" alt="" src="' + (e.foto[0] || e.cover) + '" style="width:100%;height:180px;object-fit:cover;display:block;">' : '<div style="height:180px;display:flex;align-items:center;justify-content:center;font-size:56px;background:var(--gray-50);">' + e.icon + '</div>'}
       <div style="padding:18px;">
         <div style="font-size:28px;margin-bottom:8px;">${e.icon}</div>
         <div style="font-weight:700;font-size:15px;color:var(--navy);margin-bottom:6px;">${e.nama}</div>
-        <div style="font-size:12.5px;color:var(--gray-500);">${e.foto.length} foto kegiatan</div>
+        ${e.foto.length ? '<div style="font-size:12.5px;color:var(--gray-500);">' + e.foto.length + ' foto kegiatan</div>' : ''}
       </div>
     </div>`).join('');
 }
@@ -2385,7 +2415,7 @@ function openDetail(type, id) {
       <div class="detail-meta-item"><i class="fas fa-map-marker-alt"></i> ${item.skala}</div>`;
     document.getElementById('detail-content').innerHTML = `
       <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;margin-bottom:28px;">
-        <img src="${item.foto}" alt="${item.siswa}" style="width:140px;height:160px;object-fit:cover;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);flex-shrink:0;">
+        <img loading="lazy" decoding="async" src="${item.foto}" alt="${item.siswa}" style="width:140px;height:160px;object-fit:cover;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);flex-shrink:0;">
         <div>
           <div style="font-size:48px;margin-bottom:8px;">${item.medal}</div>
           <h2 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:6px;">${item.judul}</h2>
@@ -2398,7 +2428,7 @@ function openDetail(type, id) {
       <h3>Informasi Lengkap</h3>
       <table class="detail-info-table">
         <tr><td>Nama Kejuaraan</td><td>${item.judul}</td></tr>
-        <tr><td>Nama Siswa</td><td>${item.siswa}</td></tr>
+        <tr><td>Nama Santri</td><td>${item.siswa}</td></tr>
         <tr><td>Kelas</td><td>${item.kelas}</td></tr>
         <tr><td>Tingkat / Skala</td><td>${item.skala}</td></tr>
         <tr><td>Tanggal</td><td>${item.tanggal}</td></tr>
@@ -2413,7 +2443,7 @@ function openDetail(type, id) {
         <div class="sidebar-list">
           ${DATA.prestasi.filter(p=>p.id!==id).map(p=>`
             <div class="sidebar-list-item" onclick="openDetail('prestasi',${p.id})">
-              <img alt="" src="${p.foto}" style="width:38px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;">
+              <img loading="lazy" decoding="async" alt="" src="${p.foto}" style="width:38px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;">
               <div><div class="sidebar-info-title">${p.judul}</div>
               <div class="sidebar-info-meta">${p.tanggal}</div>
               <span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-top:3px;${badgeColor(p.skala)}">${p.skala}</span></div>
@@ -2428,7 +2458,7 @@ function openDetail(type, id) {
       <div class="detail-meta-item"><i class="far fa-calendar-alt"></i> ${item.tanggal}</div>
       <div class="detail-meta-item"><i class="fas fa-tag"></i> ${item.kategori}</div>`;
     document.getElementById('detail-content').innerHTML = `
-      ${item.foto ? '<img src="'+item.foto+'" alt="" style="width:100%;max-height:380px;object-fit:cover;border-radius:14px;margin-bottom:18px;">' : '<div style="font-size:48px;margin-bottom:16px;">'+item.icon+'</div>'}
+      ${item.foto ? '<img loading="lazy" decoding="async" src="'+item.foto+'" alt="" style="width:100%;max-height:380px;object-fit:cover;border-radius:14px;margin-bottom:18px;">' : '<div style="font-size:48px;margin-bottom:16px;">'+item.icon+'</div>'}
       <h3>${item.judul}</h3>
       ${item.isi.split('\n').map(p=>p.trim()?`<p>${p.replace(/•/g,'&bull;')}</p>`:'').join('')}
       <div style="margin-top:24px;"><button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</button></div>`;
@@ -2452,7 +2482,7 @@ function openDetail(type, id) {
       ${item.jurusan ? `<div class="detail-meta-item"><i class="fas fa-graduation-cap"></i> ${item.jurusan}</div>` : ''}`;
     document.getElementById('detail-content').innerHTML = `
       <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;">
-        <img src="${item.foto}" alt="${item.nama}" style="width:120px;height:140px;object-fit:cover;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,0.12);flex-shrink:0;">
+        <img loading="lazy" decoding="async" src="${item.foto}" alt="${item.nama}" style="width:120px;height:140px;object-fit:cover;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,0.12);flex-shrink:0;">
         <div>
           <h2 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:6px;">${item.nama}</h2>
           <div style="font-size:14px;color:var(--gray-500);margin-bottom:4px;"><i class="fas fa-briefcase"></i> ${item.peran}</div>
@@ -2468,7 +2498,7 @@ function openDetail(type, id) {
         <div class="sidebar-list">
           ${DATA.alumni.filter(a=>a.id!==id).map(a=>`
             <div class="sidebar-list-item" onclick="openDetail('alumni',${a.id})">
-              <img alt="" src="${a.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+              <img loading="lazy" decoding="async" alt="" src="${a.foto}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
               <div><div class="sidebar-info-title">${a.nama}</div><div class="sidebar-info-meta">${a.peran}</div></div>
             </div>`).join('')}
         </div>
@@ -2504,7 +2534,7 @@ function openDetail(type, id) {
       <div class="detail-meta-item"><i class="fas fa-school"></i> PEM Gondanglegi Malang</div>`;
     const fotoGrid = e.foto.map((f,i)=>`
       <div style="border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.12);transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-        <img src="${f}" alt="${e.ket[i]||'Kegiatan '+(i+1)}" style="width:100%;height:220px;object-fit:cover;display:block;">
+        <img loading="lazy" decoding="async" src="${f}" alt="${e.ket[i]||'Kegiatan '+(i+1)}" style="width:100%;height:220px;object-fit:cover;display:block;">
         <div style="padding:14px 16px;background:white;font-size:13.5px;color:var(--navy);font-weight:600;border-top:3px solid var(--gold);">${e.ket[i]||''}</div>
       </div>`).join('');
     document.getElementById('detail-content').innerHTML = `
@@ -2512,7 +2542,7 @@ function openDetail(type, id) {
         <div style="font-size:52px;width:72px;height:72px;background:linear-gradient(135deg,var(--navy),var(--blue));border-radius:18px;display:flex;align-items:center;justify-content:center;">${e.icon}</div>
         <div>
           <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin-bottom:4px;">${e.nama}</h2>
-          <div style="font-size:13px;color:var(--gray-500);"><i class="fas fa-images"></i> ${e.foto.length} Foto Kegiatan</div>
+          <div style="font-size:13px;color:var(--gray-500);">${e.foto.length ? '<i class="fas fa-images"></i> ' + e.foto.length + ' Foto Kegiatan' : ''}</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">${fotoGrid}</div>
@@ -2545,7 +2575,7 @@ function openDetail(type, id) {
 function renderSemuaPrestasi() {
   document.getElementById('sp-list').innerHTML = DATA.prestasi.map(p=>`
     <div onclick="openDetail('prestasi',${p.id})" style="display:flex;gap:16px;padding:18px 20px;background:white;border-radius:14px;border-left:4px solid var(--gold);box-shadow:0 2px 12px rgba(0,0,0,0.05);align-items:flex-start;cursor:pointer;transition:all .2s;margin-bottom:12px;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform=''">
-      <img alt="" src="${p.foto}" style="width:56px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+      <img loading="lazy" decoding="async" alt="" src="${p.foto}" style="width:56px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;">
       <div style="flex:1;">
         <div style="font-size:22px;margin-bottom:4px;">${p.medal}</div>
         <div style="font-weight:700;color:var(--navy);font-size:14.5px;margin-bottom:4px;">${p.judul}</div>
@@ -2588,7 +2618,7 @@ function renderSemuaAlumni() {
   if (!el) return;
   el.innerHTML = DATA.alumni.map(a=>`
     <div onclick="openDetail('alumni',${a.id})" style="display:flex;gap:16px;padding:18px;background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.05);cursor:pointer;transition:all .2s;margin-bottom:14px;align-items:center;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-      ${a.foto !== KONTEN_FOTO_KOSONG ? `<img src="${a.foto}" alt="${a.nama}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--blue));display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:26px;flex-shrink:0;"><i class="fas fa-user"></i></div>`}
+      ${a.foto !== KONTEN_FOTO_KOSONG ? `<img loading="lazy" decoding="async" src="${a.foto}" alt="${a.nama}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--blue));display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:26px;flex-shrink:0;"><i class="fas fa-user"></i></div>`}
       <div>
         <div style="font-weight:700;color:var(--navy);font-size:15px;margin-bottom:4px;">${a.nama}</div>
         <div style="font-size:13px;color:var(--gray-500);">${a.peran}</div>
@@ -2970,7 +3000,7 @@ function tampilkanBuktiPSB(d, noPendaftaran) {
     '<div id="psb-print-area" style="max-width:640px;margin:0 auto;padding:24px;border:1px solid var(--gray-200);border-radius:14px;background:white;">' +
       '<div style="text-align:center;border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:16px;">' +
         '<h3 style="font-family:\'Playfair Display\',serif;color:var(--navy);font-size:19px;margin-bottom:4px;">Bukti Pendaftaran Calon Santri Baru</h3>' +
-        '<p style="font-size:12.5px;color:var(--gray-500);margin:0;">PEM Gondanglegi Malang &middot; Tahun Ajaran 2026/2027</p>' +
+        '<p style="font-size:12.5px;color:var(--gray-500);margin:0;">PEM Gondanglegi Malang &middot; Tahun Ajaran 2027/2028</p>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:12.5px;color:var(--gray-500);margin-bottom:14px;">' +
         '<span>No. Pendaftaran: <strong style="color:var(--navy);">' + psbEsc(noPendaftaran) + '</strong></span>' +
@@ -3036,7 +3066,7 @@ function renderTesLogin(no, nik) {
     '<div class="sp-card" style="max-width:520px;margin:0 auto;padding:28px;">' +
       '<h2 style="margin-bottom:6px;"><i class="fas fa-pen-to-square"></i> Tes Masuk Online</h2>' +
       '<p style="font-size:13.5px;color:var(--gray-500);line-height:1.6;margin-bottom:18px;">Masukkan No. Pendaftaran dan NIK calon santri sesuai yang diisi pada formulir pendaftaran.</p>' +
-      '<div class="form-group"><label>No. Pendaftaran</label><input id="tes-no" class="form-input" autocapitalize="characters" placeholder="PSB-2026001-PEM" value="' + psbEsc(no) + '"></div>' +
+      '<div class="form-group"><label>No. Pendaftaran</label><input id="tes-no" class="form-input" autocapitalize="characters" placeholder="PSB-2027001-PEM" value="' + psbEsc(no) + '"></div>' +
       '<div class="form-group"><label>NIK Calon Santri</label><input id="tes-nik" class="form-input" inputmode="numeric" maxlength="16" placeholder="16 angka" value="' + psbEsc(nik) + '"></div>' +
       '<p id="tes-pesan" style="display:none;color:#dc2626;font-size:13px;font-weight:600;line-height:1.6;margin:0 0 14px;"></p>' +
       '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
@@ -3050,7 +3080,7 @@ function renderTesLogin(no, nik) {
 async function tesCek() {
   const no = (document.getElementById('tes-no').value || '').trim().toUpperCase();
   const nik = (document.getElementById('tes-nik').value || '').trim();
-  if (!/^PSB-[0-9]{7,9}-PEM$/.test(no)) return tesPesan('No. Pendaftaran tidak valid. Contoh: PSB-2026001-PEM');
+  if (!/^PSB-[0-9]{7,9}-PEM$/.test(no)) return tesPesan('No. Pendaftaran tidak valid. Contoh: PSB-2027001-PEM');
   if (!/^[0-9]{16}$/.test(nik)) return tesPesan('NIK harus 16 angka.');
   tesPesan('');
 
@@ -3308,7 +3338,7 @@ function renderStatusForm() {
     '<div class="sp-card" style="max-width:520px;margin:0 auto;padding:28px;">' +
       '<h2 style="margin-bottom:6px;"><i class="fas fa-magnifying-glass"></i> Cek Status Pendaftaran</h2>' +
       '<p style="font-size:13.5px;color:var(--gray-500);line-height:1.6;margin-bottom:18px;">Masukkan No. Pendaftaran dan NIK calon santri sesuai yang diisi pada formulir pendaftaran.</p>' +
-      '<div class="form-group"><label>No. Pendaftaran</label><input id="status-no" class="form-input" autocapitalize="characters" placeholder="PSB-2026001-PEM"></div>' +
+      '<div class="form-group"><label>No. Pendaftaran</label><input id="status-no" class="form-input" autocapitalize="characters" placeholder="PSB-2027001-PEM"></div>' +
       '<div class="form-group"><label>NIK Calon Santri</label><input id="status-nik" class="form-input" inputmode="numeric" maxlength="16" placeholder="16 angka"></div>' +
       '<p id="status-pesan" style="display:none;color:#dc2626;font-size:13px;font-weight:600;line-height:1.6;margin:0 0 14px;"></p>' +
       '<div style="display:flex;gap:12px;flex-wrap:wrap;">' +
@@ -3327,7 +3357,7 @@ function statusPesan(t) {
 async function statusCek() {
   const no = (document.getElementById('status-no').value || '').trim().toUpperCase();
   const nik = (document.getElementById('status-nik').value || '').trim();
-  if (!/^PSB-[0-9]{7,9}-PEM$/.test(no)) return statusPesan('No. Pendaftaran tidak valid. Contoh: PSB-2026001-PEM');
+  if (!/^PSB-[0-9]{7,9}-PEM$/.test(no)) return statusPesan('No. Pendaftaran tidak valid. Contoh: PSB-2027001-PEM');
   if (!/^[0-9]{16}$/.test(nik)) return statusPesan('NIK harus 16 angka.');
   statusPesan('');
   if (typeof _psbSupabaseClient === 'undefined' || !_psbSupabaseClient) return statusPesan('Layanan belum tersedia. Silakan coba lagi nanti.');
@@ -3458,7 +3488,7 @@ function bukaKarya(i) {
   if (!k || !m) return;
   const foto = karyaFoto(k.foto), tautan = karyaTautan(k.tautan);
   document.getElementById('karya-modal-isi').innerHTML =
-    (foto ? '<img src="' + psbEsc(foto) + '" alt="' + psbEsc(k.judul) + '" style="width:100%;max-height:420px;object-fit:cover;display:block;border-radius:16px 16px 0 0;">' : '') +
+    (foto ? '<img loading="lazy" decoding="async" src="' + psbEsc(foto) + '" alt="' + psbEsc(k.judul) + '" style="width:100%;max-height:420px;object-fit:cover;display:block;border-radius:16px 16px 0 0;">' : '') +
     '<div style="padding:22px 26px 28px;">' +
       (k.kategori ? '<span style="display:inline-block;background:var(--gray-100);color:var(--blue);font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:10px;">' + psbEsc(k.kategori) + '</span>' : '') +
       '<h2 style="font-size:22px;color:var(--navy);margin:0 0 6px;">' + psbEsc(k.judul) + '</h2>' +
@@ -3501,6 +3531,80 @@ function KONTEN_KOSONG(jenis) {
   return kKosong(_kontenGagal ? 'Konten belum dapat dimuat. Silakan muat ulang halaman.' : 'Belum ada ' + jenis + '.');
 }
 
+const AGENDA_WARNA = ['var(--gold)', 'var(--blue)', '#16a34a', '#7c3aed'];
+const BULAN_SINGKAT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+function rupiah(n) { return 'Rp' + Number(n).toLocaleString('id-ID'); }
+function renderBiaya() {
+  if (!DATA.biaya.length) return;   // belum ada data di panel admin: tetap pakai tabel bawaan
+  const tb = document.getElementById('psb-biaya-tbl'), cat = document.getElementById('psb-biaya-catatan'); if (!tb) return;
+  const total = DATA.biaya.reduce((t, b) => t + b.nominal, 0);
+  tb.innerHTML = DATA.biaya.map(b => '<tr><td>' + b.nama + (b.ket ? '<br><span style="font-size:12.5px;color:var(--gray-500);font-weight:400;">' + b.ket + '</span>' : '') + '</td><td>' + rupiah(b.nominal) + '</td></tr>').join('') +
+    '<tr class="total"><td>Total</td><td>' + rupiah(total) + '</td></tr>';
+  if (cat) cat.textContent = DATA.biaya.length > 1 ? 'Total = ' + DATA.biaya.map(b => rupiah(b.nominal)).join(' + ') + '.' : '';
+}
+function renderSambutan() {
+  const d = DATA.sambutan; if (!d) return;   // belum ada data di panel admin: tetap pakai teks bawaan
+  const tiap = (k, fn) => document.querySelectorAll('[data-mudir="' + k + '"]').forEach(fn);
+  const para = d.isi.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean)
+    .map(p => /^(Bismillah|Wassalamu)/i.test(p) ? '<p><em>' + p + '</em></p>' : '<p>' + p.replace(/\n/g, '<br>') + '</p>');
+  tiap('nama', e => { e.textContent = d.nama; });
+  tiap('jabatan', e => { e.textContent = d.jabatan; });
+  tiap('foto', e => { if (d.foto) e.src = d.foto; e.alt = d.nama; });
+  tiap('isi', e => { e.innerHTML = para.join(''); });
+  tiap('ringkas', e => { e.innerHTML = para.slice(0, 3).join(''); });
+}
+function renderAgenda() {
+  const box = document.getElementById('agenda-list'); if (!box) return;
+  if (!DATA.agenda.length) { box.innerHTML = KONTEN_KOSONG('agenda'); return; }
+  box.innerHTML = DATA.agenda.map((a, i) => {
+    const w = AGENDA_WARNA[i % AGENDA_WARNA.length];
+    const m = /^(\d{4})-(\d{2})/.exec(a.tgl);
+    const bln = m ? BULAN_SINGKAT[Number(m[2]) - 1] || '' : '', thn = m ? m[1] : '';
+    return '<div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--gray-50);border-radius:12px;border-left:4px solid ' + w + ';">' +
+      '<div style="min-width:70px;text-align:center;background:' + w + ';color:white;border-radius:10px;padding:8px 4px;"><div style="font-size:20px;font-weight:900;">' + bln + '</div><div style="font-size:11px;">' + thn + '</div></div>' +
+      '<div><div style="font-weight:700;color:var(--navy);margin-bottom:4px;">' + a.judul + '</div>' +
+      (a.waktu ? '<div style="font-size:12.5px;font-weight:600;color:var(--blue);margin-bottom:2px;">' + a.waktu + '</div>' : '') +
+      (a.isi ? '<div style="font-size:13px;color:var(--gray-500);">' + a.isi + '</div>' : '') + '</div></div>';
+  }).join('');
+}
+
+// Foto cadangan berupa inisial nama, dibuat di peramban (tanpa layanan luar)
+function avatarLokal(nama) {
+  const kata = String(nama).replace(/[^A-Za-z\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  const ini = ((kata[0] || '?')[0] + (kata[1] ? kata[1][0] : '')).toUpperCase();
+  const warna = ['#1a4faf', '#16a34a', '#dc2626', '#7c3aed', '#0284c7', '#c8922a'][String(nama).length % 6];
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="' + warna + '"/><text x="100" y="126" font-size="80" font-weight="700" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif">' + ini + '</text></svg>');
+}
+function kartuTenaga(g) {
+  return '<div class="tenaga-card"><img class="tenaga-photo" loading="lazy" decoding="async" src="' + (g.foto || avatarLokal(g.nama)) + '" alt="' + g.nama + '">' +
+    '<div class="tenaga-name">' + g.nama + '</div>' +
+    (g.jabatan ? '<div class="tenaga-jabatan">' + g.jabatan + '</div>' : '') +
+    (g.motto ? '<div class="tenaga-quote">&ldquo;' + g.motto + '&rdquo;</div>' : '') + '</div>';
+}
+const WARNA_AVATAR = ['#16a34a,#166534', '#dc2626,#991b1b', '#7c3aed,#4c1d95', '#0284c7,#075985', '#d97706,#92400e', '#0f766e,#134e4a', '#be185d,#831843', '#4338ca,#312e81', '#047857,#065f46', '#1a4faf,#0b2a6b'];
+function kartuGuruBeranda(g, i) {
+  const ini = (String(g.nama).replace(/[^A-Za-z]/g, '')[0] || '?').toUpperCase();
+  const gaya = g.foto ? "background:url('" + g.foto + "') center/cover no-repeat;" : 'background:linear-gradient(135deg,' + WARNA_AVATAR[i % WARNA_AVATAR.length] + ');';
+  return '<div class="guru-card"><div class="guru-avatar" style="' + gaya + '">' + (g.foto ? '' : ini) + '</div><div class="guru-name">' + g.nama + '</div></div>';
+}
+function renderTenaga() {
+  const isi = (id, kel) => {
+    const el = document.getElementById(id); if (!el) return;
+    const l = DATA.guru.filter(g => g.kelompok === kel);
+    el.innerHTML = l.length ? l.map(kartuTenaga).join('') : KONTEN_KOSONG('data tenaga');
+  };
+  isi('tenaga-pendidik-grid', 'Tenaga Pendidik'); isi('tenaga-kependidikan-grid', 'Tenaga Kependidikan');
+  if (DATA.guru.length) {
+    const ge = document.getElementById('guru-grid'), ke = document.getElementById('karyawan-grid');
+    if (ge) ge.innerHTML = DATA.guru.filter(g => g.kelompok === 'Tenaga Pendidik').map(kartuGuruBeranda).join('');
+    if (ke) ke.innerHTML = DATA.guru.filter(g => g.kelompok === 'Tenaga Kependidikan').map(kartuGuruBeranda).join('');
+  }
+  if (DATA.guru.length) {
+    const a = document.getElementById('stat-guru'); if (a) a.textContent = DATA.guru.length;
+    const b = document.getElementById('info-jumlah-guru'); if (b) b.textContent = DATA.guru.length + ' guru & staf';
+  }
+}
+
 function petakanKonten(rows) {
   const per = j => rows.filter(r => r.jenis === j);
   DATA.berita = per('berita').map(r => ({
@@ -3519,6 +3623,25 @@ function petakanKonten(rows) {
     skala: kBersih(r.tingkat || 'Sekolah'), medali: r.medali || '', medal: MEDALI_EMOJI[r.medali] || '\u{1F3C5}',
     foto: kFoto(r.foto_url) || KONTEN_FOTO_KOSONG, ket: kBersih(r.isi || r.judul)
   }));
+  DATA.agenda = per('agenda').map(r => ({ judul: kBersih(r.judul), tgl: String(r.tanggal || '').slice(0, 10), waktu: kBersih(r.kategori || ''), isi: kBersih(r.isi || '') }))
+    .sort((a, b) => a.tgl < b.tgl ? -1 : a.tgl > b.tgl ? 1 : 0);
+  DATA.guru = per('guru').map(r => ({ nama: kBersih(r.judul), jabatan: kBersih(r.kategori || ''), kelompok: kBersih(r.nama_terkait || 'Tenaga Pendidik'),
+    motto: kBersih(r.isi || ''), foto: kFoto(r.foto_url), urutan: r.urutan == null ? 9999 : Number(r.urutan) }))
+    .sort((a, b) => a.urutan - b.urutan || a.nama.localeCompare(b.nama, 'id'));
+  const galAlbum = per('galeri'), urut = r => r.urutan == null ? 9999 : Number(r.urutan);
+  const ekRows = per('ekskul');
+  if (ekRows.length) DATA.ekskul = ekRows.map(r => {
+    const nama = kBersih(r.judul), f = galAlbum.filter(g => String(g.kategori || '').trim().toLowerCase() === nama.toLowerCase());
+    return { id: r.id, nama, icon: kBersih(r.kategori || '🏅'), deskripsi: kBersih(r.isi || ''), cover: kFoto(r.foto_url), urutan: urut(r),
+      foto: f.map(g => kFoto(g.foto_url)).filter(Boolean), ket: f.map(g => kBersih(g.judul)) };
+  }).sort((x, y) => x.urutan - y.urutan);
+  DATA.biaya = per('biaya').map(r => ({ nama: kBersih(r.judul), nominal: Number(String(r.kategori || '').replace(/\D/g, '')) || 0, ket: kBersih(r.isi || ''), urutan: urut(r) }))
+    .sort((x, y) => x.urutan - y.urutan);
+  const rk = per('rekening').map(r => ({ bank: kBersih(r.kategori || ''), no: kBersih(r.ringkasan || ''), an: kBersih(r.nama_terkait || ''), urutan: urut(r) }))
+    .filter(x => x.bank && x.no && x.an).sort((x, y) => x.urutan - y.urutan)[0];
+  if (rk) { PSB_REKENING.bank = rk.bank; PSB_REKENING.no = rk.no; PSB_REKENING.an = rk.an; }
+  const sb = per('sambutan')[0];
+  DATA.sambutan = sb ? { nama: kBersih(sb.judul), jabatan: kBersih(sb.kategori || ''), isi: kBersih(sb.isi || ''), foto: kFoto(sb.foto_url) } : null;
   _galeri = per('galeri').map(r => ({ judul: kBersih(r.judul), foto: kFoto(r.foto_url), kategori: kBersih(r.kategori) })).filter(x => x.foto);
   KARYA_SANTRI = per('karya').map(r => ({
     judul: kBersih(r.judul), santri: kBersih(r.nama_terkait || ''), kelas: kBersih(r.kelas), kategori: kBersih(r.kategori),
@@ -3591,7 +3714,7 @@ function bukaGaleri(i) {
   const x = _galeri[i], m = document.getElementById('karya-modal');
   if (!x || !m) return;
   document.getElementById('karya-modal-isi').innerHTML =
-    '<img src="' + x.foto + '" alt="' + x.judul + '" style="width:100%;max-height:75vh;object-fit:contain;display:block;background:#0a1f44;border-radius:16px 16px 0 0;">' +
+    '<img loading="lazy" decoding="async" src="' + x.foto + '" alt="' + x.judul + '" style="width:100%;max-height:75vh;object-fit:contain;display:block;background:#0a1f44;border-radius:16px 16px 0 0;">' +
     '<div style="padding:16px 22px 22px;"><div style="font-weight:700;color:var(--navy);font-size:16px;">' + x.judul + '</div>' +
     '<div style="margin-top:14px;"><button type="button" class="btn btn-outline" onclick="tutupKarya()">Tutup</button></div></div>';
   m.classList.add('buka');
@@ -3600,13 +3723,20 @@ function bukaGaleri(i) {
 async function muatKonten() {
   if (typeof _psbSupabaseClient !== 'undefined' && _psbSupabaseClient) {
     try {
-      const { data, error } = await _psbSupabaseClient.from('konten')
-        .select('id,jenis,judul,ringkasan,isi,kategori,tanggal,nama_terkait,kelas,tingkat,medali,tautan,foto_url')
+      let { data, error } = await _psbSupabaseClient.from('konten')
+        .select('id,jenis,judul,ringkasan,isi,kategori,tanggal,nama_terkait,kelas,tingkat,medali,tautan,foto_url,urutan')
         .eq('terbit', true).order('tanggal', { ascending: false }).order('id', { ascending: false }).limit(600);
+      if (error && /urutan/i.test(error.message || '')) {   // kolom urutan belum dibuat: muat tanpa kolom itu
+        const ulang = await _psbSupabaseClient.from('konten')
+          .select('id,jenis,judul,ringkasan,isi,kategori,tanggal,nama_terkait,kelas,tingkat,medali,tautan,foto_url')
+          .eq('terbit', true).order('tanggal', { ascending: false }).order('id', { ascending: false }).limit(600);
+        data = ulang.data; error = ulang.error;
+      }
       if (error) { console.error(error); _kontenGagal = true; } else petakanKonten(data || []);
     } catch (e) { console.error(e); _kontenGagal = true; }
   } else { _kontenGagal = true; }
   renderKontenBeranda();
+  renderAgenda(); renderTenaga(); renderBiaya(); renderSambutan();
   if (typeof renderKarya === 'function') renderKarya();
   _kontenSiap = true;
   if (typeof terapkanRuta === 'function') terapkanRuta();
@@ -3620,11 +3750,11 @@ async function muatKonten() {
 const SITUS_URL = 'https://pemgondanglegi.sch.id/';
 const JUDUL_BERANDA = document.title;
 const RUTE_HALAMAN = {
-  'profil': 'Profil Pesantren', 'psb': 'PSB 2026', 'tes': 'Tes Masuk Online', 'status': 'Cek Status Pendaftaran',
+  'profil': 'Profil Pesantren', 'psb': 'PSB 2027/2028', 'tes': 'Tes Masuk Online', 'status': 'Cek Status Pendaftaran',
   'karya': 'Karya Santri', 'galeri': 'Galeri', 'semua-prestasi': 'Prestasi', 'semua-berita': 'Berita',
   'semua-pengumuman': 'Pengumuman', 'ekskul-list': 'Ekstrakurikuler', 'semua-alumni': 'Alumni',
   'info-pesantren': 'Info Pesantren', 'agenda': 'Agenda', 'perpustakaan': 'Perpustakaan',
-  'laboratorium': 'Laboratorium', 'kesiswaan': 'Kesiswaan'
+  'kesiswaan': 'Kesiswaan'
 };
 const RUTE_DETAIL = ['berita', 'pengumuman', 'prestasi', 'ekskul', 'alumni'];
 let _ruta = '';
@@ -3938,12 +4068,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         <tr><td>Nama Pesantren</td><td>Pesantren Entrepreneur Muhammadiyah (PEM) Gondanglegi Malang</td></tr>
         <tr><td>NSP</td><td>500035070062</td></tr>
         <tr><td>Status</td><td>Swasta (Terakreditasi A)</td></tr>
-        <tr><td>Mudir Pesantren</td><td>K.H. Muh. Fahri, S.Ag., M.M.</td></tr>
-        <tr><td>Alamat</td><td>Jln. MT. Hariyono No.1 Gondanglegi Malang Jawa Timur</td></tr>
+        <tr><td>Mudir Pesantren</td><td data-mudir="nama">K.H. Muh. Fahri, S.Ag., M.M.</td></tr>
+        <tr><td>Alamat</td><td>Jln. MT. Haryono No.1 Gondanglegi Malang Jawa Timur</td></tr>
         <tr><td>Telepon</td><td>0813-3044-9182</td></tr>
-        <tr><td>Email</td><td>gondanglegippem@gmail.com</td></tr>
-        <tr><td>Jumlah Siswa</td><td>±250 siswa aktif</td></tr>
-        <tr><td>Jumlah Tenaga Pendidik</td><td>30 guru & staf</td></tr>
+        <tr><td>Email</td><td>pemgondanglegi@gmail.com</td></tr>
+        <tr><td>Jumlah Santri</td><td>±300 santri aktif</td></tr>
+        <tr><td>Jumlah Tenaga Pendidik</td><td id="info-jumlah-guru">21 guru &amp; staf</td></tr>
       </table>
     </div>
     <div style="text-align:center;margin-top:16px;"><button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali</button></div>
@@ -3964,25 +4094,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   </div>
   <div class="sp-body">
     <div class="sp-card">
-      <h2><i class="fas fa-calendar-alt"></i> Jadwal Kegiatan 2026</h2>
-      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
-        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--gray-50);border-radius:12px;border-left:4px solid var(--gold);">
-          <div style="min-width:70px;text-align:center;background:var(--navy);color:white;border-radius:10px;padding:8px 4px;"><div style="font-size:20px;font-weight:900;">01–15</div><div style="font-size:11px;">Jun 2026</div></div>
-          <div><div style="font-weight:700;color:var(--navy);margin-bottom:4px;">Pendaftaran PPDB Jalur Afirmasi</div><div style="font-size:13px;color:var(--gray-500);">Pendaftaran online dan verifikasi dokumen untuk jalur afirmasi TP 2026/2027</div></div>
-        </div>
-        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--gray-50);border-radius:12px;border-left:4px solid var(--blue);">
-          <div style="min-width:70px;text-align:center;background:var(--blue);color:white;border-radius:10px;padding:8px 4px;"><div style="font-size:20px;font-weight:900;">18–28</div><div style="font-size:11px;">Mei 2026</div></div>
-          <div><div style="font-weight:700;color:var(--navy);margin-bottom:4px;">Asesmen Sumatif Akhir Semester Kelas X & XI</div><div style="font-size:13px;color:var(--gray-500);">Ujian akhir semester genap untuk kelas X dan XI seluruh jurusan</div></div>
-        </div>
-        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--gray-50);border-radius:12px;border-left:4px solid #16a34a;">
-          <div style="min-width:70px;text-align:center;background:#16a34a;color:white;border-radius:10px;padding:8px 4px;"><div style="font-size:20px;font-weight:900;">1–14</div><div style="font-size:11px;">Jul 2026</div></div>
-          <div><div style="font-weight:700;color:var(--navy);margin-bottom:4px;">Pendaftaran Ekstrakurikuler TA Baru</div><div style="font-size:13px;color:var(--gray-500);">Pendaftaran seluruh kegiatan ekskul untuk Tahun Ajaran 2026/2027</div></div>
-        </div>
-        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--gray-50);border-radius:12px;border-left:4px solid #7c3aed;">
-          <div style="min-width:70px;text-align:center;background:#7c3aed;color:white;border-radius:10px;padding:8px 4px;"><div style="font-size:20px;font-weight:900;">14</div><div style="font-size:11px;">Jul 2026</div></div>
-          <div><div style="font-weight:700;color:var(--navy);margin-bottom:4px;">Hari Pertama Masuk Sekolah TA 2026/2027</div><div style="font-size:13px;color:var(--gray-500);">Tahun Ajaran baru dimulai, seluruh siswa wajib hadir dengan seragam lengkap</div></div>
-        </div>
-      </div>
+      <h2><i class="fas fa-calendar-alt"></i> Jadwal Kegiatan</h2>
+      <div id="agenda-list" style="display:flex;flex-direction:column;gap:14px;margin-top:8px;"></div>
     </div>
     <div style="text-align:center;margin-top:16px;"><button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali</button></div>
   </div>
@@ -4021,8 +4134,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   <div class="sp-body">
     <div class="sp-card">
       <h2><i class="fas fa-book-open"></i> Tentang Perpustakaan</h2>
-      <p>Perpustakaan PEM Gondanglegi Malang merupakan pusat sumber belajar yang dilengkapi dengan koleksi buku teks, buku referensi, jurnal, dan majalah pendidikan. Tersedia lebih dari <strong>8.000 judul buku</strong> yang dapat dipinjam oleh seluruh warga sekolah.</p>
-      <p>Perpustakaan kami juga dilengkapi fasilitas <strong>e-library</strong> dengan akses ke ribuan buku digital dan jurnal ilmiah. Ruang baca yang nyaman dan ber-AC tersedia untuk mendukung kegiatan belajar mandiri siswa.</p>
+      <p>Perpustakaan PEM Gondanglegi Malang merupakan pusat sumber belajar yang dilengkapi dengan koleksi buku teks, buku referensi, jurnal, dan majalah pendidikan. Tersedia lebih dari <strong>1.000 judul buku</strong> yang dapat dipinjam oleh seluruh warga sekolah.</p>
+      <p>Perpustakaan kami juga dilengkapi fasilitas <strong>e-library</strong> dengan akses ke ribuan buku digital dan jurnal ilmiah. Ruang baca yang nyaman dan ber-AC tersedia untuk mendukung kegiatan belajar mandiri santri.</p>
     </div>
     <div class="sp-card">
       <h2><i class="fas fa-clock"></i> Jam Layanan</h2>
@@ -4034,47 +4147,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     <div class="sp-card">
       <h2><i class="fas fa-list"></i> Fasilitas</h2>
       <ul style="padding-left:20px;">
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Koleksi 8.000+ buku teks dan referensi</li>
+        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Koleksi 1.000+ buku teks dan referensi</li>
         <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Akses e-library dan jurnal digital</li>
         <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Ruang baca ber-AC kapasitas 60 orang</li>
         <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Komputer untuk akses internet dan OPAC</li>
         <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Layanan fotokopi dan penjilidan</li>
       </ul>
-    </div>
-    <div style="text-align:center;margin-top:16px;"><button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali</button></div>
-  </div>
-</div>
-
-<!-- PAGE: LABORATORIUM -->
-<div id="page-laboratorium" class="special-page">
-  <div class="sp-hero">
-    <div class="container">
-      <div class="detail-breadcrumb">
-        <a onclick="closePage()"><i class="fas fa-home"></i> Beranda</a>
-        <i class="fas fa-chevron-right"></i><span>Laboratorium</span>
-      </div>
-      <span class="detail-tag">Layanan</span>
-      <h1 class="detail-title">Laboratorium PEM Gondanglegi</h1>
-    </div>
-  </div>
-  <div class="sp-body">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-      <div class="sp-card">
-        <h2><i class="fas fa-network-wired"></i> Lab Komputer & Jaringan (TKJ)</h2>
-        <p>Laboratorium TKJ dilengkapi 40 unit komputer terbaru, perangkat networking (router, switch, server), dan alat instalasi jaringan. Digunakan untuk praktik konfigurasi LAN, WAN, keamanan jaringan, dan UKK TKJ.</p>
-      </div>
-      <div class="sp-card">
-        <h2><i class="fas fa-calculator"></i> Lab Akuntansi (AKL)</h2>
-        <p>Lab Akuntansi memiliki 35 unit komputer berlisensi software akuntansi (MYOB, Accurate, ACCURATE Online). Digunakan untuk simulasi pembukuan, laporan keuangan, dan praktik pajak.</p>
-      </div>
-      <div class="sp-card">
-        <h2><i class="fas fa-film"></i> Lab Multimedia (MM)</h2>
-        <p>Lab Multimedia dilengkapi komputer berspesifikasi tinggi dengan Adobe Creative Suite, studio foto mini, green screen, kamera DSLR, dan peralatan audio-video untuk produksi konten digital.</p>
-      </div>
-      <div class="sp-card">
-        <h2><i class="fas fa-code"></i> Lab RPL (Rekayasa Perangkat Lunak)</h2>
-        <p>Lab RPL memiliki 38 unit komputer dengan environment pengembangan lengkap: Visual Studio Code, Android Studio, database server MySQL & PostgreSQL, dan platform cloud learning.</p>
-      </div>
     </div>
     <div style="text-align:center;margin-top:16px;"><button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali</button></div>
   </div>
@@ -4095,7 +4173,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   <div class="sp-body">
     <div class="sp-card">
       <h2><i class="fas fa-user-graduate"></i> Layanan Kesiswaan</h2>
-      <p>Bagian Kesiswaan PEM Gondanglegi melayani berbagai kebutuhan administrasi dan pembinaan siswa, mulai dari absensi, sanksi dan penghargaan, beasiswa, hingga konseling.</p>
+      <p>Bagian Kesiswaan PEM Gondanglegi melayani berbagai kebutuhan administrasi dan pembinaan santri, mulai dari absensi, sanksi dan penghargaan, beasiswa, hingga konseling.</p>
     </div>
     <div class="sp-card">
       <h2><i class="fas fa-award"></i> Program Beasiswa</h2>
@@ -4119,62 +4197,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     <div style="text-align:center;margin-top:16px;"><button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali</button></div>
   </div>
 </div>
-
-<!-- PAGE: INFO PESANTREN -->
-<div id="page-info-pesantren" class="special-page">
-  <div class="sp-hero">
-    <div class="container">
-      <div class="detail-breadcrumb">
-        <a onclick="closePage()"><i class="fas fa-home"></i> Beranda</a>
-        <i class="fas fa-chevron-right"></i><span>Info Pesantren</span>
-      </div>
-      <span class="detail-tag">Informasi</span>
-      <h1 class="detail-title">Info Pesantren PEM Gondanglegi</h1>
-    </div>
-  </div>
-  <div class="sp-body">
-    <div class="sp-card">
-      <h2><i class="fas fa-info-circle"></i> Tentang PEM Gondanglegi</h2>
-      <p>Pesantren Entrepreneur Muhammadiyah (PEM) Gondanglegi adalah lembaga pendidikan Islam terpadu yang memadukan pendidikan kejuruan SMK dengan kehidupan pesantren. Terletak di Gondanglegi, Kabupaten Malang, pesantren ini berdiri sejak 2018 di bawah naungan Yayasan PEM.</p>
-      <p>PEM Gondanglegi hadir dengan konsep unik: santri tidak hanya belajar ilmu agama, tetapi juga dibekali keterampilan vokasional yang relevan dengan kebutuhan industri sehingga siap bersaing di dunia kerja maupun berwirausaha.</p>
-    </div>
-    <div class="sp-card">
-      <h2><i class="fas fa-map-marker-alt"></i> Informasi Umum</h2>
-      <table class="detail-info-table">
-        <tr><td>Nama Lembaga</td><td>Pesantren Entrepreneur Muhammadiyah (PEM) Gondanglegi Malang</td></tr>
-        <tr><td>Alamat</td><td>Jln. MT. Hariyono No.1 Gondanglegi Malang Jawa Timur</td></tr>
-        <tr><td>Mudir Pesantren</td><td>K.H. Muh. Fahri, S.Ag., M.M.</td></tr>
-        <tr><td>Kepala SMK</td><td>Munali, S.T.</td></tr>
-        <tr><td>Tahun Berdiri</td><td>2018</td></tr>
-        <tr><td>Akreditasi</td><td>A (Unggul)</td></tr>
-        <tr><td>Telepon</td><td>(0341) 123-4567</td></tr>
-        <tr><td>Email</td><td>info@pemgondanglegi.sch.id</td></tr>
-      </table>
-    </div>
-    <div class="sp-card">
-      <h2><i class="fas fa-star"></i> Keunggulan Pesantren</h2>
-      <ul style="padding-left:20px;">
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Integrasi pendidikan kejuruan SMK dengan sistem pesantren 24 jam</li>
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Kurikulum berbasis entrepreneurship dan nilai-nilai Islam</li>
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Fasilitas modern: laboratorium komputer, multimedia, akuntansi, dan OTKP</li>
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Asrama putra dan putri berkapasitas 400 santri</li>
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Program Tahfidz Al-Quran dan kajian kitab kuning</li>
-        <li style="font-size:14.5px;line-height:2.2;color:var(--gray-700);">Jaringan alumni dan kemitraan dengan dunia industri</li>
-      </ul>
-    </div>
-    <div style="text-align:center;margin-top:16px;">
-      <button onclick="closePage()" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// Initialize ekskul list when page is loaded
-document.addEventListener('DOMContentLoaded', function() {
-  renderEkskulList && renderEkskulList();
-  generatePSBCaptcha && generatePSBCaptcha();
-});
-</script>
 
 <!-- PAGE: E-RAPORT -->
 <div id="page-eraport" class="special-page">
@@ -4380,5 +4402,36 @@ inisialisasiTurnstile();
 <a href="https://wa.me/6281330449182?text=Assalamu%27alaikum%2C%20saya%20ingin%20bertanya%20tentang%20PEM%20Gondanglegi%20Malang" target="_blank" rel="noopener" class="wa-float" aria-label="Chat WhatsApp">
   <i class="fab fa-whatsapp"></i>
 </a>
+<script>
+/* Animasi muncul saat digulir: aman bila gagal (konten tetap tampil) */
+(function () {
+  try {
+    if (!('IntersectionObserver' in window) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    var ZOOM = '.stat-item,.ekskul-card,.guru-card,.tenaga-card,.alumni-card,.prestasi-item,.kegiatan-item';
+    var NAIK = '.section-header,.news-card,.announcement-item,.kontak-item,.sp-card,.card-panel,.sidebar-card,.karya-card,.guru-more';
+    var io = new IntersectionObserver(function (daftar) {
+      daftar.forEach(function (d) {
+        if (!d.isIntersecting) return;
+        var el = d.target; io.unobserve(el); el.classList.add('rv-on');
+        setTimeout(function () { el.classList.remove('rv', 'rv-on', 'rv-zoom'); el.style.removeProperty('--rv-d'); }, 1300);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    function tandai() {
+      document.querySelectorAll(ZOOM + ',' + NAIK).forEach(function (el) {
+        if (el.dataset.rv) return; el.dataset.rv = '1';
+        var urut = Array.prototype.indexOf.call(el.parentNode.children, el);
+        el.style.setProperty('--rv-d', (urut % 6) * 70 + 'ms');
+        el.classList.add('rv'); if (el.matches(ZOOM)) el.classList.add('rv-zoom');
+        io.observe(el);
+      });
+    }
+    tandai();
+    document.documentElement.classList.add('rv-aktif');
+    var tunda = 0;
+    new MutationObserver(function () { clearTimeout(tunda); tunda = setTimeout(tandai, 40); })
+      .observe(document.body, { childList: true, subtree: true });
+  } catch (e) { document.documentElement.classList.remove('rv-aktif'); }
+})();
+</script>
 </body>
 </html>
