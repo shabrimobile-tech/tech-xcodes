@@ -4364,33 +4364,168 @@ async function loadEraport() {
   box.innerHTML = html;
 }
 
+/* ===== LBS: tampilan seperti PDF contoh ===== */
+const LBS_KATA = {
+  A: { ibadah: 'sangat istiqomah', baik: 'sangat baik', komp: 'Sangat kompeten' },
+  B: { ibadah: 'istiqomah',        baik: 'baik',        komp: 'Kompeten' },
+  C: { ibadah: 'cukup istiqomah',  baik: 'cukup baik',  komp: 'Kurang kompeten' },
+  D: { ibadah: 'kurang istiqomah', baik: 'kurang baik', komp: 'Tidak kompeten' }
+};
+const LBS_GEDUNG = { C: 'Cordova' };   // tambahkan kode lain, mis. W: 'NamaGedung', I: 'NamaGedung'
+const LBS_PENGLIHATAN_NORMAL = 6;
+const LBS_DIREKTUR = { nama: 'KH. Fahri, S. Ag., MM', nbm: 'NBM. 899 103' };
+
+function lbsPasangCss() {
+  if (document.getElementById('lbs-css')) return;
+  const st = document.createElement('style'); st.id = 'lbs-css';
+  st.textContent = `
+  .lbs-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 12px}
+  .lbs-ctl select{padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px}
+  .lbs-wrap{overflow-x:auto}
+  .lbs-kertas{background:#fff;color:#000;font-family:'Times New Roman',Times,serif;font-size:14px;min-width:620px;max-width:780px;margin:0 auto;padding:18px 22px;border:1px solid #e2e8f0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .lbs-kertas h4{text-align:center;margin:0 0 18px;font-size:17px;line-height:1.35;font-weight:700;font-family:inherit}
+  .lbs-id{border-collapse:collapse;margin-bottom:14px}.lbs-id td{padding:1px 14px 1px 0;border:0}
+  .lbs-tbl{width:100%;border-collapse:collapse}
+  .lbs-tbl td{border:1px solid #000;padding:2px 6px;vertical-align:middle}
+  .lbs-tbl .c{text-align:center}.lbs-tbl .no{width:34px;text-align:center}
+  .lbs-tbl .o{background:#f4802f;color:#fff;font-weight:700;text-align:center}
+  .lbs-ttd{position:relative;margin:34px 0 0 auto;width:260px;min-height:190px;font-size:14px}
+  .lbs-ttd img{position:absolute;left:-104px;top:-2px;width:261px;pointer-events:none}
+  .lbs-ttd .nm{margin-top:94px;font-weight:700;text-decoration:underline;position:relative}
+  .lbs-ttd .tg{position:relative}
+  @media print{
+    @page{size:A4;margin:12mm}
+    body.lbs-mencetak *{visibility:hidden!important}
+    body.lbs-mencetak .lbs-cetak-aktif,body.lbs-mencetak .lbs-cetak-aktif *{visibility:visible!important}
+    body.lbs-mencetak .lbs-cetak-aktif{position:absolute;left:0;top:0;width:100%;max-width:none;border:0}
+  }`;
+  document.head.appendChild(st);
+}
+
+function lbsBulanObj(bulan) {            // '2026-09-01' -> {y, m}
+  const p = String(bulan || '').split('-'); return { y: Number(p[0]), m: Number(p[1]) };
+}
+function lbsPeriode(bulan) {
+  const b = lbsBulanObj(bulan);
+  return new Date(b.y, b.m - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase();
+}
+function lbsTanggalAkhir(bulan) {        // tanggal terakhir bulan laporan
+  const b = lbsBulanObj(bulan);
+  return new Date(b.y, b.m, 0).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+function lbsKamar(k) {
+  k = String(k || '').trim(); if (!k) return '';
+  const i = k.indexOf('.'); if (i < 1) return k;
+  const nama = LBS_GEDUNG[k.slice(0, i).toUpperCase()];
+  return nama ? nama + k.slice(i) : k;
+}
+function lbsKelas(kelas, jur) {
+  let k = String(kelas == null ? '' : kelas).trim();
+  const romawi = { 10: 'X', 11: 'XI', 12: 'XII' };
+  if (romawi[k]) k = romawi[k];
+  return k + (jur ? (k ? '/' : '') + jur : '');
+}
+function lbsImt(bb, tb) {
+  if (bb == null || tb == null || !(Number(tb) > 0)) return null;
+  const imt = Number(bb) / (Number(tb) * Number(tb));
+  if (imt < 18.4) return { n: 'C', t: 'kurus' };
+  if (imt < 25)   return { n: 'A', t: 'Normal' };
+  return { n: 'B', t: 'gemuk' };
+}
+
+function lbsLaporanHtml(s, r) {
+  const e = escHtml;
+  const kata = (n, jenis) => (LBS_KATA[n] ? LBS_KATA[n][jenis] : '');
+  const sec = (huruf, judul) =>
+    '<tr><td class="o no" rowspan="2">' + huruf + '</td><td class="o" rowspan="2">' + judul + '</td><td class="o" colspan="3">PENILAIAN</td></tr>' +
+    '<tr><td class="o" colspan="2">NILAI</td><td class="o">DESKRIPSI</td></tr>';
+  const row = (no, nama, n, desc) =>
+    '<tr><td class="no">' + no + '</td><td>' + e(nama) + '</td><td class="c" colspan="2">' + e(n || '') + '</td><td>' + e(n ? desc : '') + '</td></tr>';
+  const baik = (no, nama, n, awal) => row(no, nama, n, awal + kata(n, 'baik'));
+  const komp = (no, nama, n, frasa) => row(no, nama, n, kata(n, 'komp') + ' dalam ' + frasa);
+
+  const pdg = r.pendengaran == null ? null : (Number(r.pendengaran) === 0 ? 'A' : 'B');
+  const plh = r.penglihatan == null ? null : (Number(r.penglihatan) === LBS_PENGLIHATAN_NORMAL ? 'A' : 'B');
+  const imt = lbsImt(r.bb, r.tb);
+
+  let h = '<div class="lbs-kertas" id="lbs-kertas-' + e(s.id) + '">';
+  h += '<h4>LAPORAN PERKEMBANGAN SANTRI<br>PERIODE ' + e(lbsPeriode(r.bulan)) + '</h4>';
+  h += '<table class="lbs-id"><tr><td>NAMA</td><td>: ' + e(s.nama) + '</td></tr>' +
+       '<tr><td>KELAS/JUR</td><td>: ' + e(lbsKelas(s.kelas, r.jurusan)) + '</td></tr>' +
+       '<tr><td>KAMAR</td><td>: ' + e(lbsKamar(r.kamar)) + '</td></tr></table>';
+  h += '<table class="lbs-tbl">';
+  h += sec('A', 'KESANTRIAN');
+  h += row(1, 'Ubudiyah', r.ubudiyah, 'Santri dalam hal melaksanakan ubudiyah ' + kata(r.ubudiyah, 'ibadah'));
+  h += baik(2, 'Kepribadian', r.kepribadian, 'Santri dalam hal kepribadian ');
+  h += baik(3, 'Sosial', r.sosial, 'Santri dalam hal pergaulan sosial ');
+  h += sec('B', 'KURIKULUM');
+  h += baik(1, 'Bahasa Arab', r.bahasa_arab, 'Santri dalam hal komunikasi Bahasa Arab ');
+  h += baik(2, 'Bahasa Inggris', r.bahasa_inggris, 'Santri dalam hal komunikasi Bahasa Inggris ');
+  h += baik(3, "Baca Al Qur'an", r.baca_quran, "Santri dalam hal membaca al Qur'an ");
+  h += '<tr><td class="no" rowspan="2">4</td><td rowspan="2">Tahfidz</td><td class="o">KELAS</td><td class="o">Juz</td><td class="o">Ayat/Surat</td></tr>' +
+       '<tr><td class="c">' + e(r.tahfidz_kelas || '') + '</td><td class="c">' + e(r.tahfidz_juz == null ? '' : r.tahfidz_juz) + '</td><td class="c">' + e(r.tahfidz_surat || '') + '</td></tr>';
+  h += sec('C', 'KESEHATAN');
+  h += baik(1, 'Pengelihatan', plh, 'Santri dalam hal pengelihatan ');
+  h += baik(2, 'Pendengaran', pdg, 'Santri dalam hal pendengaran ');
+  h += '<tr><td class="no" rowspan="2">3</td><td rowspan="2">IMT (BB:TB)</td><td class="c">' + e(r.bb == null ? '' : r.bb) + '</td>' +
+       '<td class="c" rowspan="2">' + (imt ? imt.n : '') + '</td><td rowspan="2">' + (imt ? 'Santri memiliki Indeks Massa Tubuh ' + imt.t : '') + '</td></tr>' +
+       '<tr><td class="c">' + e(r.tb == null ? '' : r.tb) + '</td></tr>';
+  h += sec('D', 'EKSTRA');
+  h += komp(1, 'Hisbul Wathan', r.hisbul_wathan, 'kegiatan kepanduan hisbul wathan.');
+  h += komp(2, 'Tapak Suci', r.tapak_suci, 'kegiatan seni bela diri tapak suci.');
+  h += komp(3, 'Voli', r.voli, 'olahraga voli.');
+  h += komp(4, 'Basket', r.basket, 'olahraga basket.');
+  h += komp(5, 'Sepak Bola', r.sepak_bola, 'olahraga sepak bola.');
+  h += komp(6, 'Futsal', r.futsal, 'olahraga futsal.');
+  h += komp(7, 'Badminton', r.badminton, 'olahraga badminton.');
+  h += '</table>';
+  h += '<div class="lbs-ttd"><div class="tg">Gondanglegi, ' + e(lbsTanggalAkhir(r.bulan)) + '</div><div class="tg">Direktur PEM Gondanglegi</div>' +
+       '<img src="img/stempel-ttd.png" alt="" onerror="this.style.display=\'none\'">' +
+       '<div class="nm">' + e(LBS_DIREKTUR.nama) + '</div><div class="tg">' + e(LBS_DIREKTUR.nbm) + '</div></div>';
+  return h + '</div>';
+}
+
+function lbsTampil(id, idx) {
+  const d = window._lbs && window._lbs[id]; if (!d) return;
+  const box = document.getElementById('lbs-v-' + id);
+  box.innerHTML = '<div class="lbs-wrap">' + lbsLaporanHtml(d.santri, d.rows[Number(idx)]) + '</div>';
+}
+function lbsCetak(id) {
+  const el = document.getElementById('lbs-kertas-' + id); if (!el) return;
+  el.classList.add('lbs-cetak-aktif'); document.body.classList.add('lbs-mencetak');
+  const bersih = () => { el.classList.remove('lbs-cetak-aktif'); document.body.classList.remove('lbs-mencetak'); window.removeEventListener('afterprint', bersih); };
+  window.addEventListener('afterprint', bersih);
+  window.print();
+}
+
 async function loadLBS() {
   const box = document.getElementById('lbs-content');
   box.innerHTML = '<p style="color:var(--gray-500)"><i class="fas fa-spinner fa-spin"></i> Memuat laporan...</p>';
+  lbsPasangCss();
   const santri = await _ambilSantri();
   if (!santri.length) { box.innerHTML = '<p>Data santri tidak ditemukan. Silakan hubungi musyrif/musyrifah.</p>'; return; }
 
-  let html = '';
+  window._lbs = {};
+  let html = ''; const tampil = [];
   for (const s of santri) {
     const { data: rows } = await _psbSupabaseClient
-      .from('lbs_bulanan').select('bulan,kehadiran_persen,juz_hafalan,nilai_akhlak,catatan')
-      .eq('santri_id', s.id).order('bulan', { ascending: false }).limit(12);
+      .from('lbs_bulanan').select('*').eq('santri_id', s.id)
+      .order('bulan', { ascending: false }).limit(12);
 
     html += '<h3 style="margin:20px 0 4px;">' + escHtml(s.nama) + '</h3>' +
-            '<p style="font-size:13px;color:var(--gray-500);margin-bottom:12px;">Kelas ' + escHtml(s.kelas || '-') + '</p>';
+            '<p style="font-size:13px;color:var(--gray-500);margin-bottom:6px;">Kelas ' + escHtml(s.kelas || '-') + '</p>';
     if (!rows || !rows.length) { html += '<p>Belum ada laporan bulanan.</p>'; continue; }
 
-    html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">' +
-      '<tr><th style="' + _thStyle + '">Bulan</th><th style="' + _thStyle + '">Kehadiran</th><th style="' + _thStyle + '">Juz Hafalan</th><th style="' + _thStyle + '">Akhlak</th><th style="' + _thStyle + '">Catatan</th></tr>' +
-      rows.map(r =>
-        '<tr><td style="' + _tdStyle + '">' + new Date(r.bulan).toLocaleDateString('id-ID', {month:'long', year:'numeric'}) + '</td>' +
-        '<td style="' + _tdStyle + '">' + escHtml(r.kehadiran_persen) + '%</td>' +
-        '<td style="' + _tdStyle + '">' + escHtml(r.juz_hafalan) + '</td>' +
-        '<td style="' + _tdStyle + '">' + escHtml(r.nilai_akhlak) + '</td>' +
-        '<td style="' + _tdStyle + '">' + escHtml(r.catatan) + '</td></tr>').join('') +
-      '</table></div>';
+    window._lbs[s.id] = { santri: s, rows };
+    const id = escHtml(s.id);
+    html += '<div class="lbs-ctl"><label>Periode: <select onchange="lbsTampil(\'' + id + '\', this.value)">' +
+      rows.map((r, i) => '<option value="' + i + '">' + escHtml(lbsPeriode(r.bulan)) + '</option>').join('') +
+      '</select></label><button class="btn btn-primary" onclick="lbsCetak(\'' + id + '\')"><i class="fas fa-print"></i> Cetak / Simpan PDF</button></div>' +
+      '<div id="lbs-v-' + id + '"></div>';
+    tampil.push(s.id);
   }
   box.innerHTML = html;
+  tampil.forEach(id => lbsTampil(id, 0));
 }
 
 muatKonten();

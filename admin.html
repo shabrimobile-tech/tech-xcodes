@@ -255,8 +255,9 @@
       </div>
 
       <div class="nv-card">
-        <h3>3. Impor Laporan Bulanan (LBS)</h3>
-        <p>Kolom CSV: <code>nis</code>, <code>bulan</code> (format TTTT-BB, contoh 2026-10), <code>kehadiran_persen</code> (0-100), <code>juz_hafalan</code> (0-30), <code>nilai_akhlak</code>, <code>catatan</code>. Mengimpor ulang bulan yang sama akan menimpa laporan lama.</p>
+        <h3>3. Impor Laporan Bulanan Santri (LBS)</h3>
+        <p>Isi template Excel (sheet <b>NILAI</b>), buka sheet <b>CSV</b>, simpan sebagai CSV UTF-8, lalu unggah di sini. Santri dikenali dari kolom <code>nis</code> atau <code>nama</code>. Kolom: <code>jurusan</code>, <code>kamar</code>, nilai A-D (<code>ubudiyah, kepribadian, sosial, bahasa_arab, bahasa_inggris, baca_quran</code>), tahfidz (<code>tahfidz_kelas, juz, ayat_surat</code>), screening (<code>bb</code> kg, <code>tb</code> meter, <code>pendengaran</code> 0/1, <code>penglihatan</code> skor, 6 = normal), dan ekstra A-D (<code>hisbul_wathan, tapak_suci, voli, basket, sepak_bola, futsal, badminton</code>). Mengimpor ulang bulan yang sama akan menimpa laporan lama.</p>
+        <div class="nv-row"><label for="nv-bulan-lbs">Bulan Laporan</label><input type="month" id="nv-bulan-lbs"></div>
         <div class="nv-row"><input type="file" id="nv-file-lbs" accept=".csv,text/csv"></div>
         <div class="nv-row">
           <button class="btn btn-outline btn-sm" onclick="unduhTemplate('lbs')"><i class="fas fa-download"></i> Unduh Template</button>
@@ -667,23 +668,80 @@ function nvKolom(header, wajib) {
   return { peta, hilang };
 }
 
+const LBS_NILAI_OK = ['A', 'B', 'C', 'D'];
+const LBS_KELAS_TAHFIDZ = { mubtadiin: 'Mubtadiin', mutawassitin: 'Mutawassitin', mutaqqodimin: 'Mutaqqodimin' };
+// [kolom di database, nama-nama kolom CSV yang diterima (sudah dinormalkan)]
+const LBS_KOLOM_NILAI = [
+  ['ubudiyah', ['ubudiyah']], ['kepribadian', ['kepribadian']], ['sosial', ['sosial']],
+  ['bahasa_arab', ['bahasaarab']], ['bahasa_inggris', ['bahasainggris']], ['baca_quran', ['bacaalquran', 'bacaquran']],
+  ['hisbul_wathan', ['hisbulwathan']], ['tapak_suci', ['tapaksuci']], ['voli', ['voli']], ['basket', ['basket']],
+  ['sepak_bola', ['sepakbola']], ['futsal', ['futsal']], ['badminton', ['badminton']]
+];
+
+function lbsBarisDariCsv(ambilAny, bulan) {      // kembalikan {o} atau {err}
+  const o = { bulan: bulan + '-01' };
+  for (const [kolom, alias] of LBS_KOLOM_NILAI) {
+    const v = ambilAny(alias).toUpperCase();
+    if (v && !LBS_NILAI_OK.includes(v)) return { err: kolom + ' harus A, B, C, atau D' };
+    o[kolom] = v || null;
+  }
+  const bb = nvAngka(ambilAny(['bb', 'bbkg'])), tb = nvAngka(ambilAny(['tb', 'tbm']));
+  if (Number.isNaN(bb) || (bb !== null && (bb < 20 || bb > 200))) return { err: 'BB harus angka 20-200 (kg)' };
+  if (Number.isNaN(tb) || (tb !== null && (tb < 1 || tb > 2.5))) return { err: 'TB harus dalam meter, contoh 1.72' };
+  o.bb = bb; o.tb = tb;
+  const dg = nvAngka(ambilAny(['pendengaran', 'pendengaran01']));
+  if (Number.isNaN(dg) || (dg !== null && dg !== 0 && dg !== 1)) return { err: 'Pendengaran harus 0 (normal) atau 1 (abnormal)' };
+  o.pendengaran = dg;
+  const lh = nvAngka(ambilAny(['penglihatan', 'penglihatanskor']));
+  if (Number.isNaN(lh)) return { err: 'Penglihatan harus berupa angka (skor, 6 = normal)' };
+  o.penglihatan = lh;
+  const kt = ambilAny(['tahfidzkelas', 'kelastahfidz']).toLowerCase().replace(/[^a-z]/g, '');
+  if (kt && !LBS_KELAS_TAHFIDZ[kt]) return { err: 'Kelas tahfidz harus Mubtadiin, Mutawassitin, atau Mutaqqodimin' };
+  o.tahfidz_kelas = kt ? LBS_KELAS_TAHFIDZ[kt] : null;
+  const juz = nvAngka(ambilAny(['juz', 'tahfidzjuz']));
+  if (Number.isNaN(juz) || (juz !== null && (!Number.isInteger(juz) || juz < 1 || juz > 30))) return { err: 'Juz harus bilangan bulat 1-30' };
+  o.tahfidz_juz = juz;
+  const surat = ambilAny(['ayatsurat', 'suratayat', 'tahfidzsurat']);
+  if (surat.length > 60) return { err: 'Ayat/Surat lebih dari 60 karakter' };
+  o.tahfidz_surat = surat || null;
+  const jur = ambilAny(['jurusan']), kmr = ambilAny(['kamar']);
+  if (jur.length > 30) return { err: 'Jurusan lebih dari 30 karakter' };
+  if (kmr.length > 20) return { err: 'Kamar lebih dari 20 karakter' };
+  o.jurusan = jur || null; o.kamar = kmr || null;
+  const kosong = Object.keys(o).every(k => k === 'bulan' || o[k] === null);
+  if (kosong) return { err: 'Tidak ada isian laporan pada baris ini' };
+  return { o };
+}
+
 async function nvValidasi(jenis, teks) {
   const santri = await nvMuatSantri();
-  const byNis = {}; santri.forEach(s => { byNis[nvNorm(s.nis)] = s; });
+  const byNis = {}, byNama = {};
+  santri.forEach(s => { byNis[nvNorm(s.nis)] = s; (byNama[nvNorm(s.nama)] = byNama[nvNorm(s.nama)] || []).push(s); });
   const rows = parseCSV(teks);
   if (rows.length < 2) return { error: 'Berkas kosong atau tidak memiliki baris data.' };
 
-  const wajib = jenis === 'raport' ? ['nis', 'mapel', 'nilai'] : ['nis', 'bulan'];
+  const wajib = jenis === 'raport' ? ['nis', 'mapel', 'nilai'] : [];
   const { peta, hilang } = nvKolom(rows[0], wajib);
   if (hilang.length) return { error: 'Kolom wajib tidak ditemukan pada baris pertama: ' + hilang.join(', ') + '.' };
+  if (jenis === 'lbs' && !('nis' in peta) && !('nama' in peta)) return { error: 'Berkas LBS harus punya kolom nis atau nama.' };
+  const bulanForm = jenis === 'lbs' ? ((document.getElementById('nv-bulan-lbs') || {}).value || '').trim() : '';
 
   const ambil = (r, k) => (k in peta ? String(r[peta[k]] == null ? '' : r[peta[k]]).trim() : '');
   const valid = new Map(); const masalah = []; let duplikat = 0;
 
   rows.slice(1).forEach((r, idx) => {
-    const no = idx + 2; // nomor baris di berkas (baris 1 = judul kolom)
-    const s = byNis[nvNorm(ambil(r, 'nis'))];
-    if (!s) { masalah.push({ no, pesan: 'NIS "' + ambil(r, 'nis') + '" tidak ditemukan' }); return; }
+    const no = idx + 2;
+    let s = null;
+    if ('nis' in peta && ambil(r, 'nis')) s = byNis[nvNorm(ambil(r, 'nis'))];
+    else if (jenis === 'lbs' && 'nama' in peta && ambil(r, 'nama')) {
+      const k = byNama[nvNorm(ambil(r, 'nama'))] || [];
+      if (k.length > 1) { masalah.push({ no, pesan: 'Nama "' + ambil(r, 'nama') + '" ada lebih dari satu santri, pakai kolom nis' }); return; }
+      s = k[0];
+    }
+    if (!s) {
+      if (jenis === 'lbs' && !ambil(r, 'nis') && !ambil(r, 'nama')) return;          // baris kosong
+      masalah.push({ no, pesan: (jenis === 'lbs' && !ambil(r, 'nis') ? 'Nama "' + ambil(r, 'nama') : 'NIS "' + ambil(r, 'nis')) + '" tidak ditemukan' }); return;
+    }
 
     if (jenis === 'raport') {
       const mapel = ambil(r, 'mapel'); const nilai = nvAngka(ambil(r, 'nilai')); const predikat = ambil(r, 'predikat');
@@ -694,19 +752,13 @@ async function nvValidasi(jenis, teks) {
       if (valid.has(kunci)) duplikat++;
       valid.set(kunci, { santri_id: s.id, mapel, nilai, predikat: predikat || null, _nama: s.nama });
     } else {
-      const bulan = ambil(r, 'bulan');
-      const mb = bulan.match(/^(\d{4})-(0[1-9]|1[0-2])$/);
-      if (!mb) { masalah.push({ no, pesan: 'Bulan harus berformat TTTT-BB, contoh 2026-10' }); return; }
-      const hadir = nvAngka(ambil(r, 'kehadiranpersen')); const juz = nvAngka(ambil(r, 'juzhafalan'));
-      const akhlak = ambil(r, 'nilaiakhlak'); const catatan = ambil(r, 'catatan');
-      if (Number.isNaN(hadir) || (hadir !== null && (hadir < 0 || hadir > 100))) { masalah.push({ no, pesan: 'Kehadiran harus angka 0-100' }); return; }
-      if (Number.isNaN(juz) || (juz !== null && (juz < 0 || juz > 30))) { masalah.push({ no, pesan: 'Juz hafalan harus angka 0-30' }); return; }
-      if (akhlak.length > 50) { masalah.push({ no, pesan: 'Nilai akhlak lebih dari 50 karakter' }); return; }
-      if (catatan.length > 500) { masalah.push({ no, pesan: 'Catatan lebih dari 500 karakter' }); return; }
-      if (hadir === null && juz === null && !akhlak && !catatan) { masalah.push({ no, pesan: 'Tidak ada isian laporan pada baris ini' }); return; }
+      const bulan = ambil(r, 'bulan') || bulanForm;
+      if (!/^(\d{4})-(0[1-9]|1[0-2])$/.test(bulan)) { masalah.push({ no, pesan: 'Bulan belum dipilih (isi kolom bulan TTTT-BB atau pilih Bulan Laporan di atas)' }); return; }
+      const hasil = lbsBarisDariCsv(ks => { for (const k of ks) { const v = ambil(r, k); if (v !== '') return v; } return ''; }, bulan);
+      if (hasil.err) { masalah.push({ no, pesan: hasil.err }); return; }
       const kunci = s.id + '|' + bulan;
       if (valid.has(kunci)) duplikat++;
-      valid.set(kunci, { santri_id: s.id, bulan: bulan + '-01', kehadiran_persen: hadir, juz_hafalan: juz, nilai_akhlak: akhlak || null, catatan: catatan || null, _nama: s.nama });
+      valid.set(kunci, Object.assign({ santri_id: s.id, _nama: s.nama }, hasil.o));
     }
   });
   return { baris: Array.from(valid.values()), masalah, duplikat, total: rows.length - 1 };
@@ -783,7 +835,7 @@ function nvUnduh(nama, isi) {
 
 function unduhTemplate(jenis) {
   if (jenis === 'raport') nvUnduh('template-nilai-eraport.csv', 'nis,mapel,nilai,predikat\ncontohnis,Matematika,85,B\ncontohnis,Bahasa Arab,90,A\n');
-  else nvUnduh('template-laporan-bulanan.csv', 'nis,bulan,kehadiran_persen,juz_hafalan,nilai_akhlak,catatan\ncontohnis,2026-10,98,2.5,A,"Hafalan meningkat, tetap pertahankan"\n');
+  else nvUnduh('template-laporan-bulanan.csv', 'nis,nama,bulan,jurusan,kamar,ubudiyah,kepribadian,sosial,bahasa_arab,bahasa_inggris,baca_quran,tahfidz_kelas,juz,ayat_surat,bb,tb,pendengaran,penglihatan,hisbul_wathan,tapak_suci,voli,basket,sepak_bola,futsal,badminton\ncontohnis,Abyyu Risqi Zanuar,2026-09,TAB,C.201,C,B,B,B,B,A,Mutaqqodimin,1,Al Baqarah,64,1.72,1,6,B,C,B,B,A,A,B\n');
 }
 
 async function unduhDaftarSantri() {
